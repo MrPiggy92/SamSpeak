@@ -16,7 +16,22 @@ class Input(SamSpeakCallable):
 class Println(SamSpeakCallable):
     def arity(self): return 1
     def call(self, interpreter, arguments):
-        print(arguments[0])
-        return arguments[0]
+        strignified = self.stringify(arguments[0])
+        print(strignified)
+        return strignified
     def __repr__(self):
         return "<native fn println>"
+    def stringify(self, value):
+        if value == None: return "nil"
+        if type(value) == float:
+            text = str(value)
+            if text[-2:] == ".0":
+                text = text[:-2]
+            return text
+        elif type(value) == list:
+            strList = [self.stringify(item) for item in value]
+            stringified = '['
+            stringified += ' '.join(strList)
+            stringified += ']'
+            return stringified
+        return str(value)

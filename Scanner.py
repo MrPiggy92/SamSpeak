@@ -7,6 +7,9 @@ class Scanner:
         "or", "return", "super",
         "me", "true", "var", "while",
     ]
+    types = [
+        "Num", "Str", "Nil", "Bool", "List"
+    ]
     def __init__(self, source, SamSpeak):
         self.source = source
         self.tokens = []
@@ -36,6 +39,9 @@ class Scanner:
                 self.addSingleToken("DOTDOT")
             else:
                 self.addSingleToken("DOT")
+        elif c == ':':
+            if self.match('='): self.addSingleToken("COLON_EQUAL")
+            else: self.addSingleToken("COLON")
         elif c == '-': self.addSingleToken("MINUS")
         elif c == '+': self.addSingleToken("PLUS")
         elif c == ';': self.addSingleToken("SEMICOLON")
@@ -103,6 +109,9 @@ class Scanner:
         while self.isAlphaNumeric(self.peek()): self.advance()
         text = self.source[self.start : self.current]
         if text in self.keywords:
+            self.addSingleToken(text.upper())
+            return
+        elif text in self.types:
             self.addSingleToken(text.upper())
             return
         self.addToken("IDENTIFIER", text)

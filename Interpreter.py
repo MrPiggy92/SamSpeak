@@ -5,6 +5,7 @@ from SamSpeakFunction import *
 from Return import *
 from SamSpeakClass import *
 from Builtins import *
+from Expr import *
 import time
 
 class Interpreter:
@@ -16,12 +17,16 @@ class Interpreter:
         self.globals.define("input", Input())
         self.globals.define("println", Println())
         self.locals = {}
+        self.currentBlock = "NONE"
     def interpret(self, statements):
         try:
             for statement in statements:
                 self.execute(statement)
         except SamSpeakRuntimeError as e:
             self.SamSpeak_class.runtimeError(e)
+        #mainCall = Call(Variable(Token("IDENTIFIER", None, "main", -1)), Token("RIGHT_PAREN", None, ')', -1), args)
+        #print(mainCall)
+        #mainCall.accept(self)
     def visitLiteralExpr(self, expr):
         return expr.value
     def visitGroupingExpr(self, expr):
@@ -103,6 +108,7 @@ class Interpreter:
         return self.lookUpVariable(expr.name, expr)
     def lookUpVariable(self, name, expr):
         try:
+            #print(self.locals)
             distance = self.locals[expr]
             return self.environment.getAt(distance, name.lexeme)
         except:
@@ -139,7 +145,23 @@ class Interpreter:
         index = self.evaluate(expr.index)
         if type(accessee) != list:
             raise SamSpeakRuntimeError(expr.bracket, "Can only access elements of lists.")
+        if index >= len(accessee):
+            raise SamSpeakRuntimeError(expr.bracket, "List index greater than list length.")
         return accessee[int(index)]
+    def visitTypeCastExpr(self, expr):
+        left = self.evaluate(expr.left)
+        if type(expr.new_type) != Type:
+            raise SamSpeakRuntimeError(expr.colon, "Can only cast to a builtin type.")
+        if expr.new_type.name.type == "NUM":
+            return float(left)
+        elif expr.new_type.name.type == "STR":
+            return str(left)
+        elif expr.new_type.name.type == "NIL":
+            return None
+        elif expr.new_type.name.type == "LIST":
+            return list(left)
+        elif expr.new_type.name.type == "BOOL":
+            return self.isTruthy(left)
     def visitMeExpr(self, expr):
         return self.lookUpVariable(expr.keyword, expr)
     def visitSuperExpr(self, expr):
@@ -209,6 +231,9 @@ class Interpreter:
         finally:
             self.environment = previous
     def execute(self, stmt):
+        #if self.currentBlock == "NONE" and type(stmt) not in [Function, Class, Var]:
+        #    print("You can only declare things outside of a function.")
+        #    return
         stmt.accept(self)
     def resolve(self, expr, depth):
         self.locals[expr] = depth
@@ -229,11 +254,3 @@ class Interpreter:
     def checkNumberOperands(self, operator, left, right):
         if type(left) == type(right) == float: return
         raise SamSpeakRuntimeError(operator, "Operands must be numbers.")
-    def stringify(self, value):
-        if value == None: return "nil"
-        if type(value) == float:
-            text = str(value)
-            if text[-2:] == ".0":
-                text = text[:-2]
-            return text
-        return str(value)

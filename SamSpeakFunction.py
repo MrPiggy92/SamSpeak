@@ -8,11 +8,13 @@ class SamSpeakFunction(SamSpeakCallable):
         self.declaration = declaration
         self.closure = closure
     def call(self, interpreter, arguments):
+        #interpreter.currentBlock = "FUNC"
         environment = Environment(self.closure)
         for param, arg in zip(self.declaration.params, arguments):
             environment.define(param.lexeme, arg)
         try:
             interpreter.executeBlock(self.declaration.body, environment)
+            #interpreter.currentBlock = "NONE"
         except Return as e:
             if self.isInitialiser: return self.closure.getAt(0, "me")
             return e.value

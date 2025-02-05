@@ -11,10 +11,10 @@ class SamSpeak:
         self.hadRuntimeError = False
         self.interpreter = Interpreter(self)
     def main(self):
-        if len(sys.argv) > 2:
-            print("Usage: python3 SamSpeak.py [script]")
-            exit(64)
-        elif len(sys.argv) == 2:
+        #if len(sys.argv) > 2:
+        #    print("Usage: python3 SamSpeak.py [script]")
+        #    exit(64)
+        if len(sys.argv) >= 2:
             self.runFile(sys.argv[1])
         else:
             self.runPrompt()
@@ -35,7 +35,10 @@ class SamSpeak:
             scanner = Scanner(source, self)
             tokens = scanner.scanTokens()
             parser = Parser(tokens, self)
-            statements = parser.parse()
+            args = list(sys.argv)
+            args.pop(0)
+            args.pop(0)
+            statements = parser.parse(args)
             #print(statements)
             if self.hadError: return
             resolver = Resolver(self.interpreter, self)
@@ -50,10 +53,10 @@ class SamSpeak:
         #for token in tokens:
         #    print(token)
     def error(self, line, message):
-        print("ScanError")
+        #print("ScanError")
         self.report(line, '', message)
     def parseError(self, token, message):
-        print("ParseError")
+        #print("ParseError")
         if token.type == "EOF": 
             self.report(token.line, "at end", message)
         else:
@@ -62,7 +65,7 @@ class SamSpeak:
         print(f"[line {line}] Error{(' ' + where) if where != '' else where}: {message}")
         self.hadError = True
     def runtimeError(self, e):
-        print("RUNTIME")
+        #print("RUNTIME")
         print(f"[line {e.token.line}] {str(e.args[1])}")
         self.hadRuntimeError = True
 SamSpeak = SamSpeak()

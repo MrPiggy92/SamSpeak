@@ -105,6 +105,9 @@ class Resolver:
         self.resolve(expr.accessee)
         self.resolve(expr.index)
         return None
+    def visitTypeCastExpr(self, expr):
+        self.resolve(expr.left)
+        return None
     def visitGroupingExpr(self, expr):
         self.resolve(expr.expression)
         return None

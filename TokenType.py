@@ -9,6 +9,7 @@ TokenType = [
     "EQUAL", "EQUAL_EQUAL",
     "GREATER", "GREATER_EQUAL",
     "LESS", "LESS_EQUAL",
+    "COLON_EQUAL", "COLON",
 
     # Literals.
     "IDENTIFIER", "STRING", "NUMBER",
@@ -16,6 +17,9 @@ TokenType = [
     # Keywords.
     "AND", "CLASS", "ELSE", "FALSE", "FN", "FOR", "IF", "NIL", "OR",
     "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE",
+    
+    # Types
+    "NUM", "STR", "BOOL", "NIL", "LIST",
     
     # EOF
     "EOF"

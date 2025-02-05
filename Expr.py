@@ -110,3 +110,19 @@ class Variable:
         return visitor.visitVariableExpr(self)
     def __repr__(self):
         return f"Variable: ({self.name})"
+class TypeCast:
+    def __init__(self, left, colon, new_type):
+        self.left = left
+        self.colon = colon
+        self.new_type = new_type
+    def accept(self, visitor):
+        return visitor.visitTypeCastExpr(self)
+    def __repr__(self):
+        return f"TypeCast: ({self.left}, {self.colon}, {self.new_type})"
+class Type:
+    def __init__(self, name):
+        self.name = name
+    def accept(self, visitor):
+        return visitor.visitTypeExpr(self)
+    def __repr__(self):
+        return f"Type: ({self.name})"

@@ -8,20 +8,22 @@ class GenerateAst:
         outputDir = sys.argv[1]
         #outputDir = ""
         self.defineAst(outputDir, "Expr", [
-        "Assign   : name, value",
-        "Binary   : left, operator, right",
-        "Call     : callee, paren, arguments",
-        "Access   : accessee, bracket, index",
-        "Get      : object, name",
-        "Grouping : expression",
-        "List     : items",
-        "Literal  : value",
-        "Logical  : left, operator, right",
-        "Set      : object, name, value",
-        "Super    : keyword, method",
-        "Me     : keyword",
-        "Unary    : operator, right",
-        "Variable : name"
+        "Assign     : name, value",
+        "Binary     : left, operator, right",
+        "Call       : callee, paren, arguments",
+        "Access     : accessee, bracket, index",
+        "Get        : object, name",
+        "Grouping   : expression",
+        "List       : items",
+        "Literal    : value",
+        "Logical    : left, operator, right",
+        "Set        : object, name, value",
+        "Super      : keyword, method",
+        "Me         : keyword",
+        "Unary      : operator, right",
+        "Variable   : name",
+        "TypeCast   : left, colon, new_type",
+        "Type       : name"
         ])
         self.defineAst(outputDir, "Stmt", [
         "Block      : statements",

@@ -1,20 +1,27 @@
 from Expr import *
 from Stmt import *
+from Token import *
 
 class Parser:
     def __init__(self, tokens, SamSpeak):
         self.tokens = tokens
         self.current = 0
         self.SamSpeak_class = SamSpeak
-    def parse(self):
+    def parse(self, args):
+        self.currentBlock = False
         statements = []
         while not self.isAtEnd():
             statements.append(self.declaration())
+            if statements[-1] == None:
+                statements.pop()
+        betterArgs = List([Literal(value) for value in args])
+        mainCall = Call(Variable(Token("IDENTIFIER", "main", "main", -1)), Token("RIGHT_PAREN", None, ')', -1), [betterArgs])
+        statements.append(mainCall)
         return statements
     def declaration(self):
         try:
             if self.match("VAR"): return self.varDeclaration()
-            elif self.match("FUN"): return self.function("function")
+            elif self.match("FN"): return self.function("function")
             elif self.match("CLASS"): return self.classDeclaration()
             return self.statement()
         except ParseError:
@@ -23,8 +30,11 @@ class Parser:
     def varDeclaration(self):
         name = self.consume("IDENTIFIER", "Expect variable name.")
         initialiser = None
-        if self.match("EQUAL"):
+        if self.match("COLON_EQUAL"):
             initialiser = self.expression()
+        elif self.match("EQUAL"):
+            self.error(self.previous(), "Can't declare variables without :=")
+            raise self.error(self.previous(), "Can't declare variables without :=")
         self.consume("SEMICOLON", "Expect ';' after variable declaration.")
         return Var(name, initialiser)
     def classDeclaration(self):
@@ -40,13 +50,18 @@ class Parser:
         self.consume("RIGHT_BRACE", "Expect '}' after class body")
         return Class(name, superclass, methods)
     def statement(self):
-        if self.match("PRINT"): return self.printStatement()
-        elif self.match("IF"): return self.ifStatement()
-        elif self.match("WHILE"): return self.whileStatement()
-        elif self.match("FOR"): return self.forStatement()
-        elif self.match("LEFT_BRACE"): return Block(self.block())
-        elif self.match("RETURN"): return self.returnStatement()
-        return self.expressionStatement()
+        stmt = None
+        if self.match("PRINT"): stmt = self.printStatement()
+        elif self.match("IF"): stmt = self.ifStatement()
+        elif self.match("WHILE"): stmt = self.whileStatement()
+        elif self.match("FOR"): stmt = self.forStatement()
+        elif self.match("LEFT_BRACE"): stmt = Block(self.block())
+        elif self.match("RETURN"): stmt = self.returnStatement()
+        if stmt == None: stmt = self.expressionStatement()
+        if not self.currentBlock:
+            print("[WARNING] Outside of main function, you can only declare thigns.")
+            return
+        return stmt
     def ifStatement(self):
         self.consume("LEFT_PAREN", "Expect '(' after 'if'.")
         condition = self.expression()
@@ -120,10 +135,13 @@ class Parser:
         body = self.block()
         return Function(name, parameters, body)
     def block(self):
+        previousBlock = self.currentBlock
+        self.currentBlock = True
         statements = []
         while (not self.check("RIGHT_BRACE")) and (not self.isAtEnd()):
             statements.append(self.declaration())
         self.consume("RIGHT_BRACE", "Expect '}' after block.")
+        self.currentBlock = previousBlock
         return statements
     def assignment(self):
         expr = self.list()
@@ -144,11 +162,18 @@ class Parser:
         if self.match("LEFT_BRACKET"):
             contents = []
             while not self.match("RIGHT_BRACKET"):
-                item = self.logicalOr()
+                item = self.type_casr()
                 contents.append(item)
             return List(contents)
         else:
-            return self.logicalOr()
+            return self.type_cast()
+    def type_cast(self):
+        left = self.logicalOr()
+        while self.match("COLON"):
+            colon = self.previous()
+            right = self.logicalOr()
+            left = TypeCast(left, colon, right)
+        return left
     def logicalOr(self):
         expr = self.logicalAnd()
         while self.match("OR"):
@@ -242,7 +267,10 @@ class Parser:
         elif self.match("ME"):
             return Me(self.previous())
         elif self.match("IDENTIFIER"):
+            #print(self.previous())
             return Variable(self.previous())
+        elif self.match("NUM", "STR", "NIL", "BOOL", "LIST"):
+            return Type(self.previous())
         elif self.match("LEFT_PAREN"):
             expr = self.expression()
             self.consume("RIGHT_PAREN", "Expect ')' after expression.")
