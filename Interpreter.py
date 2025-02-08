@@ -16,6 +16,8 @@ class Interpreter:
         self.globals.define("clock", Clock())
         self.globals.define("input", Input())
         self.globals.define("println", Println())
+        self.globals.define("random", Random())
+        self.globals.define("round", Round())
         self.locals = {}
         self.currentBlock = "NONE"
     def interpret(self, statements):
@@ -53,6 +55,12 @@ class Interpreter:
     def visitBinaryExpr(self, expr):
         left = self.evaluate(expr.left)
         right = self.evaluate(expr.right)
+        # print('\n')
+        # print(left)
+        # print(type(left))
+        # print(right)
+        # print(type(right))
+        # print(expr.operator.type)
         if expr.operator.type == "GREATER":
             self.checkNumberOperands(expr.operator, left, right)
             return float(left) > float(right)
@@ -86,7 +94,7 @@ class Interpreter:
             if type(left) == float and type(right) == float:
                 return float(left) + float(right)
             elif type(left) == str and type(right) == str:
-                return str(left) + str(right)
+                return self.stringify(left) + self.stringify(right)
             raise SamSpeakRuntimeError(expr.operator, "Operands must be two numbers or two strigns.")
         elif expr.operator.type == "MODULO":
             self.checkNumberOperands(expr.operator, left, right)
@@ -143,8 +151,8 @@ class Interpreter:
         accessee = self.evaluate(expr.accessee)
         #print(f"h{accessee}h")
         index = self.evaluate(expr.index)
-        if type(accessee) != list:
-            raise SamSpeakRuntimeError(expr.bracket, "Can only access elements of lists.")
+        if type(accessee) not in  [list, str]:
+            raise SamSpeakRuntimeError(expr.bracket, "Can only access elements of lists or strings.")
         if index >= len(accessee):
             raise SamSpeakRuntimeError(expr.bracket, "List index greater than list length.")
         return accessee[int(index)]
@@ -155,7 +163,7 @@ class Interpreter:
         if expr.new_type.name.type == "NUM":
             return float(left)
         elif expr.new_type.name.type == "STR":
-            return str(left)
+            return self.stringify(left)
         elif expr.new_type.name.type == "NIL":
             return None
         elif expr.new_type.name.type == "LIST":
@@ -254,3 +262,17 @@ class Interpreter:
     def checkNumberOperands(self, operator, left, right):
         if type(left) == type(right) == float: return
         raise SamSpeakRuntimeError(operator, "Operands must be numbers.")
+    def stringify(self, value):
+        if value == None: return "nil"
+        if type(value) == float:
+            text = str(value)
+            if text[-2:] == ".0":
+                text = text[:-2]
+            return text
+        elif type(value) == list:
+            strList = [self.stringify(item) for item in value]
+            stringified = '['
+            stringified += ' '.join(strList)
+            stringified += ']'
+            return stringified
+        return str(value)

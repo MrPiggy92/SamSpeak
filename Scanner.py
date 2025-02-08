@@ -42,12 +42,24 @@ class Scanner:
         elif c == ':':
             if self.match('='): self.addSingleToken("COLON_EQUAL")
             else: self.addSingleToken("COLON")
-        elif c == '-': self.addSingleToken("MINUS")
-        elif c == '+': self.addSingleToken("PLUS")
+        elif c == '-':
+            if self.match('='): self.addSingleToken("MINUS_EQUAL")
+            elif self.match('-'): self.addSingleToken("MINUS_MINUS")
+            else: self.addSingleToken("MINUS")
+        elif c == '+':
+            if self.match('='): self.addSingleToken("PLUS_EQUAL")
+            elif self.match('+'): self.addSingleToken("PLUS_PLUS")
+            else: self.addSingleToken("PLUS")
         elif c == ';': self.addSingleToken("SEMICOLON")
-        elif c == '*': self.addSingleToken("STAR")
-        elif c == '%': self.addSingleToken("MODULO")
-        elif c == '^': self.addSingleToken("UP_ARROW")
+        elif c == '*':
+            if self.match('='): self.addSingleToken("STAR_EQUAL")
+            else: self.addSingleToken("STAR")
+        elif c == '%':
+            if self.match('='): self.addSingleToken("MODULO_EQUAL")
+            else: self.addSingleToken("MODULO")
+        elif c == '^':
+            if self.match('='): self.addSingleToken("UP_ARROW_EQUAL")
+            else: self.addSingleToken("UP_ARROW")
         elif c == '!': self.addSingleToken("BANG_EQUAL" if self.match('=') else "BANG")
         elif c == '=': self.addSingleToken("EQUAL_EQUAL" if self.match('=') else "EQUAL")
         elif c == '<': self.addSingleToken("LESS_EQUAL" if self.match('=') else "LESS")
@@ -56,7 +68,8 @@ class Scanner:
             if self.match('/'):
                 while self.peek() != "\n" and not self.isAtEnd(): self.advance()
             else:
-                self.addSingleToken("SLASH")
+                if self.match('='): self.addSingleToken("SLASH_EQUAL")
+                else: self.addSingleToken("SLASH")
         elif c == '"': self.string()
         elif self.isDigit(c): self.number()
         elif self.isAlpha(c): self.identifier()

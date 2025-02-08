@@ -1,37 +1,35 @@
 from SamSpeakCallable import *
-import time
+import time, random
 
 class Clock(SamSpeakCallable):
     def arity(self): return 0
     def call(self, interpeter, arguments):
         return time.time()
     def __repr__(self):
-        return "<native fn clock>"
+        return "<native fn clock> Get current computer time"
 class Input(SamSpeakCallable):
     def arity(self): return 1
     def call(self, interpreter, arguments):
         return input(arguments[0])
     def __repr__(self):
-        return "<native fn input>"
+        return "<native fn input> Output text to console then wait for user input and return it"
 class Println(SamSpeakCallable):
     def arity(self): return 1
     def call(self, interpreter, arguments):
-        strignified = self.stringify(arguments[0])
+        strignified = interpreter.stringify(arguments[0])
         print(strignified)
         return strignified
     def __repr__(self):
-        return "<native fn println>"
-    def stringify(self, value):
-        if value == None: return "nil"
-        if type(value) == float:
-            text = str(value)
-            if text[-2:] == ".0":
-                text = text[:-2]
-            return text
-        elif type(value) == list:
-            strList = [self.stringify(item) for item in value]
-            stringified = '['
-            stringified += ' '.join(strList)
-            stringified += ']'
-            return stringified
-        return str(value)
+        return "<native fn println> Output text to the console"
+class Random(SamSpeakCallable):
+    def arity(self): return 0
+    def call(self, interpreter, arguments):
+        return random.random()
+    def __repr__(self):
+        return "<native fn random> generate a random number between 0 and 1"
+class Round(SamSpeakCallable):
+    def arity(self): return 1
+    def call(self, interpreter, arguments):
+        return float(round(arguments[0]))
+    def __repr__(self):
+        return "<native fn round> round numbers to nearest integer"

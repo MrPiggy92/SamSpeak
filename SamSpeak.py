@@ -53,10 +53,10 @@ class SamSpeak:
         #for token in tokens:
         #    print(token)
     def error(self, line, message):
-        #print("ScanError")
+        print("ScanError")
         self.report(line, '', message)
     def parseError(self, token, message):
-        #print("ParseError")
+        print("ParseError")
         if token.type == "EOF": 
             self.report(token.line, "at end", message)
         else:
@@ -65,7 +65,7 @@ class SamSpeak:
         print(f"[line {line}] Error{(' ' + where) if where != '' else where}: {message}")
         self.hadError = True
     def runtimeError(self, e):
-        #print("RUNTIME")
+        print("RUNTIME")
         print(f"[line {e.token.line}] {str(e.args[1])}")
         self.hadRuntimeError = True
 SamSpeak = SamSpeak()

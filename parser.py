@@ -9,12 +9,15 @@ class Parser:
         self.SamSpeak_class = SamSpeak
     def parse(self, args):
         self.currentBlock = False
+        self.mainFunction = False
         statements = []
         while not self.isAtEnd():
             statements.append(self.declaration())
             if statements[-1] == None:
                 statements.pop()
         betterArgs = List([Literal(value) for value in args])
+        if not self.mainFunction:
+            self.error(self.tokens[-1], "No main function.")
         mainCall = Call(Variable(Token("IDENTIFIER", "main", "main", -1)), Token("RIGHT_PAREN", None, ')', -1), [betterArgs])
         statements.append(mainCall)
         return statements
@@ -59,7 +62,7 @@ class Parser:
         elif self.match("RETURN"): stmt = self.returnStatement()
         if stmt == None: stmt = self.expressionStatement()
         if not self.currentBlock:
-            print("[WARNING] Outside of main function, you can only declare thigns.")
+            self.error(self.previous(), "Outside of main function, you can only declare things.")
             return
         return stmt
     def ifStatement(self):
@@ -133,6 +136,7 @@ class Parser:
         self.consume("RIGHT_PAREN", "Expect ')' after parameters.")
         self.consume("LEFT_BRACE", "Expect '{' before " + kind + " body.")
         body = self.block()
+        self.mainFunction = True
         return Function(name, parameters, body)
     def block(self):
         previousBlock = self.currentBlock
@@ -157,12 +161,101 @@ class Parser:
                 get = expr
                 return Set(get.object, get.name, value)
             self.error(equals, "Invalid assignment target.")
+        elif self.match("PLUS_EQUAL"):
+            equals = self.previous()
+            value = self.assignment()
+            value = Binary(expr, Token("PLUS", '+', None, equals.line), value)
+            if type(expr) == Variable:
+                name = expr.name
+                return Assign(name, value)
+            elif type(expr) == Get:
+                get = expr
+                return Set(get.object, get.name, value)
+            self.error(equals, "Invalid assignment target.")
+        elif self.match("MINUS_EQUAL"):
+            equals = self.previous()
+            value = self.assignment()
+            value = Binary(expr, Token("MINUS", '-', None, equals.line), value)
+            if type(expr) == Variable:
+                name = expr.name
+                return Assign(name, value)
+            elif type(expr) == Get:
+                get = expr
+                return Set(get.object, get.name, value)
+            self.error(equals, "Invalid assignment target.")
+        elif self.match("STAR_EQUAL"):
+            equals = self.previous()
+            value = self.assignment()
+            value = Binary(expr, Token("STAR", '*', None, equals.line), value)
+            if type(expr) == Variable:
+                name = expr.name
+                return Assign(name, value)
+            elif type(expr) == Get:
+                get = expr
+                return Set(get.object, get.name, value)
+            self.error(equals, "Invalid assignment target.")
+        elif self.match("SLASH_EQUAL"):
+            equals = self.previous()
+            value = self.assignment()
+            value = Binary(expr, Token("SLASH", '/', None, equals.line), value)
+            if type(expr) == Variable:
+                name = expr.name
+                return Assign(name, value)
+            elif type(expr) == Get:
+                get = expr
+                return Set(get.object, get.name, value)
+            self.error(equals, "Invalid assignment target.")
+        elif self.match("MODULO_EQUAL"):
+            equals = self.previous()
+            value = self.assignment()
+            value = Binary(expr, Token("MODULO", '%', None, equals.line), value)
+            if type(expr) == Variable:
+                name = expr.name
+                return Assign(name, value)
+            elif type(expr) == Get:
+                get = expr
+                return Set(get.object, get.name, value)
+            self.error(equals, "Invalid assignment target.")
+        elif self.match("UP_ARROW_EQUAL"):
+            equals = self.previous()
+            value = self.assignment()
+            value = Binary(expr, Token("UP_ARROW", '^', None, equals.line), value)
+            if type(expr) == Variable:
+                name = expr.name
+                return Assign(name, value)
+            elif type(expr) == Get:
+                get = expr
+                return Set(get.object, get.name, value)
+            self.error(equals, "Invalid assignment target.")
+        elif self.match("PLUS_PLUS"):
+            equals = self.previous()
+            value = Literal(1.0)
+            value = Binary(expr, Token("PLUS", '+', None, equals.line), value)
+            if type(expr) == Variable:
+                name = expr.name
+                return Assign(name, value)
+            elif type(expr) == Get:
+                get = expr
+                return Set(get.object, get.name, value)
+            self.error(equals, "Invalid assignment target.")
+        elif self.match("MINUS_MINUS"):
+            equals = self.previous()
+            value = Literal(1.0)
+            value = Binary(expr, Token("MINUS", '-', None, equals.line), value)
+            if type(expr) == Variable:
+                name = expr.name
+                return Assign(name, value)
+            elif type(expr) == Get:
+                get = expr
+                return Set(get.object, get.name, value)
+            self.error(equals, "Invalid assignment target.")
+        return expr
         return expr
     def list(self):
         if self.match("LEFT_BRACKET"):
             contents = []
             while not self.match("RIGHT_BRACKET"):
-                item = self.type_casr()
+                item = self.type_cast()
                 contents.append(item)
             return List(contents)
         else:
@@ -211,6 +304,14 @@ class Parser:
             right = self.term()
             expr = Binary(expr, operator, right)
         return expr
+    # def x_crement(self):
+        # expr = self.term()
+        # while self.match("MINUS_MINUS", "PLUS_PLUS"):
+            # operator = self.previous()
+            # operator = Token(operator.type.split('_')[0], operator.lexeme[0], None, operator.line)
+            # right = Literal(1.0)
+            # expr = Binary(expr, operator, right)
+        # return expr
     def term(self):
         expr = self.factor()
         while self.match("MINUS", "PLUS"):
