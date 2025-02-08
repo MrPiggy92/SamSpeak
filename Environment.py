@@ -15,10 +15,14 @@ class Environment:
             environment = environment.enclosing
         return environment
     def get(self, name):
+        #print(self.values)
         if name.lexeme in self.values.keys():
+            #print(f"hi: {name.lexeme}")
             return self.values[name.lexeme]
         elif self.enclosing != None:
+            #print(f"hello: {name.lexeme}")
             return self.enclosing.get(name)
+        #print("bye")
         raise SamSpeakRuntimeError(name, f"Undefined variable '{name.lexeme}'.")
     def getAt(self, distance, name):
         return self.ancestor(distance).values[name]

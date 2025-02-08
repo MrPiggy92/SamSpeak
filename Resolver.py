@@ -17,6 +17,7 @@ class Resolver:
         self.define(stmt.name)
         return None
     def visitFunctionStmt(self, stmt):
+        if stmt.name == None: return
         self.declare(stmt.name)
         self.define(stmt.name)
         self.resolveFunction(stmt, "FUNCTION")
@@ -120,6 +121,9 @@ class Resolver:
     def visitUnaryExpr(self, expr):
         self.resolve(expr.right)
         return None
+    def visitLambdaExpr(self, expr):
+        self.resolve(expr.body)
+        return None
     def visitMeExpr(self, expr):
         if self.currentClass == "NONE":
             self.SamSpeak.parseError(expr.keyword, "Can't use 'me' outside of a class.")
@@ -136,7 +140,7 @@ class Resolver:
         if len(self.scopes) == 0: return
         scope = self.scopes[-1]
         if name.lexeme in scope.keys():
-            self.SamSpeak.error(name, "Already a variable with this name in this scope.")
+            self.SamSpeak.parseError(name, "Already a variable with this name in this scope.")
         scope[name.lexeme] = False
     def define(self, name):
         if len(self.scopes) == 0: return

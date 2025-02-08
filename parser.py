@@ -3,11 +3,12 @@ from Stmt import *
 from Token import *
 
 class Parser:
-    def __init__(self, tokens, SamSpeak):
+    def __init__(self, tokens, SamSpeak, runFromFile):
         self.tokens = tokens
         self.current = 0
         self.SamSpeak_class = SamSpeak
-    def parse(self, args):
+        self.file = runFromFile
+    def parse(self, args=None):
         self.currentBlock = False
         self.mainFunction = False
         statements = []
@@ -15,11 +16,12 @@ class Parser:
             statements.append(self.declaration())
             if statements[-1] == None:
                 statements.pop()
-        betterArgs = List([Literal(value) for value in args])
-        if not self.mainFunction:
-            self.error(self.tokens[-1], "No main function.")
-        mainCall = Call(Variable(Token("IDENTIFIER", "main", "main", -1)), Token("RIGHT_PAREN", None, ')', -1), [betterArgs])
-        statements.append(mainCall)
+        if self.file:
+            betterArgs = List([Literal(value) for value in args])
+            if not self.mainFunction:
+                self.error(self.tokens[-1], "No main function.")
+            mainCall = Call(Variable(Token("IDENTIFIER", "main", "main", -1)), Token("RIGHT_PAREN", None, ')', -1), [betterArgs])
+            statements.append(mainCall)
         return statements
     def declaration(self):
         try:
@@ -61,7 +63,7 @@ class Parser:
         elif self.match("LEFT_BRACE"): stmt = Block(self.block())
         elif self.match("RETURN"): stmt = self.returnStatement()
         if stmt == None: stmt = self.expressionStatement()
-        if not self.currentBlock:
+        if not self.currentBlock and self.file:
             self.error(self.previous(), "Outside of main function, you can only declare things.")
             return
         return stmt
@@ -136,7 +138,7 @@ class Parser:
         self.consume("RIGHT_PAREN", "Expect ')' after parameters.")
         self.consume("LEFT_BRACE", "Expect '{' before " + kind + " body.")
         body = self.block()
-        self.mainFunction = True
+        if name.lexeme == "main": self.mainFunction = True
         return Function(name, parameters, body)
     def block(self):
         previousBlock = self.currentBlock
@@ -304,14 +306,6 @@ class Parser:
             right = self.term()
             expr = Binary(expr, operator, right)
         return expr
-    # def x_crement(self):
-        # expr = self.term()
-        # while self.match("MINUS_MINUS", "PLUS_PLUS"):
-            # operator = self.previous()
-            # operator = Token(operator.type.split('_')[0], operator.lexeme[0], None, operator.line)
-            # right = Literal(1.0)
-            # expr = Binary(expr, operator, right)
-        # return expr
     def term(self):
         expr = self.factor()
         while self.match("MINUS", "PLUS"):
@@ -344,7 +338,7 @@ class Parser:
                 break
         return expr
     def call(self):
-        expr = self.primary()
+        expr = self.lam()
         while True:
             if self.match("LEFT_PAREN"):
                 expr = self.finishCall(expr)
@@ -354,6 +348,22 @@ class Parser:
             else:
                 break
         return expr
+    def lam(self):
+        if self.match("LM"):
+            self.consume("LEFT_PAREN", f"Expect '(' after 'lm'.")
+            parameters = []
+            if not self.check("RIGHT_PAREN"):
+                parameters.append(self.consume("IDENTIFIER", "Expect paramter name."))
+                while self.match("COMMA"):
+                    if len(parameters) >= 255:
+                        self.error(self.peek(), "Can't have more than 255 paramaters.")
+                    parameters.append(self.consume("IDENTIFIER", "Expect paramter name."))
+            self.consume("RIGHT_PAREN", "Expect ')' after parameters.")
+            self.consume("LEFT_BRACE", "Expect '{' before lambda body.")
+            body = self.block()
+            return Lambda(parameters, body)
+        else:
+            return self.primary()
     def primary(self):
         if self.match("TRUE"): return Literal(True)
         elif self.match("FALSE"): return Literal(False)
@@ -376,6 +386,8 @@ class Parser:
             expr = self.expression()
             self.consume("RIGHT_PAREN", "Expect ')' after expression.")
             return Grouping(expr)
+        #if type(self.statements[-1]) == Function:
+        #    
         raise self.error(self.peek(), "Expect expression.")
     def finishCall(self, callee):
         arguments = []

@@ -8,10 +8,15 @@ class SamSpeakFunction(SamSpeakCallable):
         self.declaration = declaration
         self.closure = closure
     def call(self, interpreter, arguments):
+        #print(arguments)
         #interpreter.currentBlock = "FUNC"
         environment = Environment(self.closure)
         for param, arg in zip(self.declaration.params, arguments):
+            #print(param.lexeme)
+            #print(arg)
+            #print()
             environment.define(param.lexeme, arg)
+            #print(environment.values)
         try:
             interpreter.executeBlock(self.declaration.body, environment)
             #interpreter.currentBlock = "NONE"
@@ -23,7 +28,10 @@ class SamSpeakFunction(SamSpeakCallable):
     def arity(self):
         return len(self.declaration.params)
     def __repr__(self):
-        return f"<fn {self.declaration.name.lexeme}>"
+        try:
+            return f"<fn {self.declaration.name.lexeme}>"
+        except:
+            return "<lambda fn>"
     def bind(self, instance):
         environment = Environment(self.closure)
         environment.define("me", instance)

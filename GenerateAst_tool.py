@@ -23,7 +23,8 @@ class GenerateAst:
         "Unary      : operator, right",
         "Variable   : name",
         "TypeCast   : left, colon, new_type",
-        "Type       : name"
+        "Type       : name",
+        "Lambda     : params, body"
         ])
         self.defineAst(outputDir, "Stmt", [
         "Block      : statements",
@@ -47,7 +48,7 @@ class GenerateAst:
             textToWrite += f"""    def accept(self, visitor):
         return visitor.visit{className}{baseName}(self)
 """
-            reprText = ", ".join(["{self." + field + '}' for field in fields.split(", ")])
+            reprText = ", ".join([field + ": {self." + field + '}' for field in fields.split(", ")])
             textToWrite += f"""    def __repr__(self):
         return f"{className}: ({reprText})"
 """

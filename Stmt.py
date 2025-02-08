@@ -4,7 +4,7 @@ class Block:
     def accept(self, visitor):
         return visitor.visitBlockStmt(self)
     def __repr__(self):
-        return f"Block: ({self.statements})"
+        return f"Block: (statements: {self.statements})"
 class Class:
     def __init__(self, name, superclass, methods):
         self.name = name
@@ -13,14 +13,14 @@ class Class:
     def accept(self, visitor):
         return visitor.visitClassStmt(self)
     def __repr__(self):
-        return f"Class: ({self.name}, {self.superclass}, {self.methods})"
+        return f"Class: (name: {self.name}, superclass: {self.superclass}, methods: {self.methods})"
 class Expression:
     def __init__(self, expression):
         self.expression = expression
     def accept(self, visitor):
         return visitor.visitExpressionStmt(self)
     def __repr__(self):
-        return f"Expression: ({self.expression})"
+        return f"Expression: (expression: {self.expression})"
 class Function:
     def __init__(self, name, params, body):
         self.name = name
@@ -29,7 +29,7 @@ class Function:
     def accept(self, visitor):
         return visitor.visitFunctionStmt(self)
     def __repr__(self):
-        return f"Function: ({self.name}, {self.params}, {self.body})"
+        return f"Function: (name: {self.name}, params: {self.params}, body: {self.body})"
 class If:
     def __init__(self, condition, thenBranch, elseBranch):
         self.condition = condition
@@ -38,7 +38,7 @@ class If:
     def accept(self, visitor):
         return visitor.visitIfStmt(self)
     def __repr__(self):
-        return f"If: ({self.condition}, {self.thenBranch}, {self.elseBranch})"
+        return f"If: (condition: {self.condition}, thenBranch: {self.thenBranch}, elseBranch: {self.elseBranch})"
 class Return:
     def __init__(self, keyword, value):
         self.keyword = keyword
@@ -46,7 +46,7 @@ class Return:
     def accept(self, visitor):
         return visitor.visitReturnStmt(self)
     def __repr__(self):
-        return f"Return: ({self.keyword}, {self.value})"
+        return f"Return: (keyword: {self.keyword}, value: {self.value})"
 class Var:
     def __init__(self, name, initialiser):
         self.name = name
@@ -54,7 +54,7 @@ class Var:
     def accept(self, visitor):
         return visitor.visitVarStmt(self)
     def __repr__(self):
-        return f"Var: ({self.name}, {self.initialiser})"
+        return f"Var: (name: {self.name}, initialiser: {self.initialiser})"
 class While:
     def __init__(self, condition, body):
         self.condition = condition
@@ -62,4 +62,4 @@ class While:
     def accept(self, visitor):
         return visitor.visitWhileStmt(self)
     def __repr__(self):
-        return f"While: ({self.condition}, {self.body})"
+        return f"While: (condition: {self.condition}, body: {self.body})"

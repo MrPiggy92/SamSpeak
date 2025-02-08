@@ -21,25 +21,29 @@ class SamSpeak:
     def runFile(self, path):
         with open(path) as file:
             code = file.read()
-        self.run(code)
+        self.run(code, True)
         if self.hadError: exit(65)
         if self.hadRuntimeError: exit(70)
     def runPrompt(self):
         while True:
             line = input(" > ").strip()
             if line == None: break
-            self.run(line)
+            self.run(line, False)
             self.hadError = False
-    def run(self, source):
+    def run(self, source, fromFile):
         try:
             scanner = Scanner(source, self)
             tokens = scanner.scanTokens()
-            parser = Parser(tokens, self)
-            args = list(sys.argv)
-            args.pop(0)
-            args.pop(0)
-            statements = parser.parse(args)
-            #print(statements)
+            parser = Parser(tokens, self, fromFile)
+            if fromFile:
+                args = list(sys.argv)
+                args.pop(0)
+                args.pop(0)
+                statements = parser.parse(args)
+            else:
+                statements = parser.parse()
+            #print('\n\n'.join([str(statement) for statement in statements]))
+            #print('\n\n'.join([str(statement) for statement in statements[0].body]))
             if self.hadError: return
             resolver = Resolver(self.interpreter, self)
             resolver.resolve(statements)

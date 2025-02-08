@@ -6,6 +6,7 @@ class Scanner:
         "for", "fn", "if", "nil",
         "or", "return", "super",
         "me", "true", "var", "while",
+        "lm"
     ]
     types = [
         "Num", "Str", "Nil", "Bool", "List"

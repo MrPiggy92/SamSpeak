@@ -26,9 +26,6 @@ class Interpreter:
                 self.execute(statement)
         except SamSpeakRuntimeError as e:
             self.SamSpeak_class.runtimeError(e)
-        #mainCall = Call(Variable(Token("IDENTIFIER", None, "main", -1)), Token("RIGHT_PAREN", None, ')', -1), args)
-        #print(mainCall)
-        #mainCall.accept(self)
     def visitLiteralExpr(self, expr):
         return expr.value
     def visitGroupingExpr(self, expr):
@@ -115,12 +112,25 @@ class Interpreter:
     def visitVariableExpr(self, expr):
         return self.lookUpVariable(expr.name, expr)
     def lookUpVariable(self, name, expr):
+        #print(name)
+        #print(self.globals.get(name))
+        #print('\n')
         try:
             #print(self.locals)
             distance = self.locals[expr]
+            #print("-----")
+            #print(name)
+            #print(distance)
+            #print(self.environment.getAt(distance, name.lexeme))
+            #print(isinstance(self.environment.getAt(distance, name.lexeme), SamSpeakCallable))
+            #print(type(self.environment.getAt(distance, name.lexeme)))
+            #print('\n-----')
             return self.environment.getAt(distance, name.lexeme)
         except:
-            return self.globals.get(name)
+            try:
+                return self.environment.get(name)
+            except:
+                return self.globals.get(name)
     def visitAssignExpr(self, expr):
         value = self.evaluate(expr.value)
         try:
@@ -140,8 +150,12 @@ class Interpreter:
         callee = self.evaluate(expr.callee)
         arguments = []
         for argument in expr.arguments:
+            #print(argument)
             arguments.append(self.evaluate(argument))
+            #print(arguments[-1])
         if not isinstance(callee, SamSpeakCallable):
+            #print(callee)
+            #print(type(callee))
             raise SamSpeakRuntimeError(expr.paren, "Can only call functions and classes.")
         function = SamSpeakCallable(callee) # Callee
         if len(arguments) != function.arity():
@@ -172,6 +186,9 @@ class Interpreter:
             return self.isTruthy(left)
     def visitMeExpr(self, expr):
         return self.lookUpVariable(expr.keyword, expr)
+    def visitLambdaExpr(self, expr):
+        function = SamSpeakFunction(expr, self.environment, False)
+        return function
     def visitSuperExpr(self, expr):
         distance = self.locals[expr]
         superclass = self.environment.getAt(distance, "super")
@@ -186,7 +203,7 @@ class Interpreter:
     def visitFunctionStmt(self, stmt):
         function = SamSpeakFunction(stmt, self.environment, False)
         self.environment.define(stmt.name.lexeme, function)
-        return None
+        return function
     def visitReturnStmt(self, stmt):
         value = None
         if stmt.value != None:
@@ -239,9 +256,7 @@ class Interpreter:
         finally:
             self.environment = previous
     def execute(self, stmt):
-        #if self.currentBlock == "NONE" and type(stmt) not in [Function, Class, Var]:
-        #    print("You can only declare things outside of a function.")
-        #    return
+        #print(self.environment.get('n'))
         stmt.accept(self)
     def resolve(self, expr, depth):
         self.locals[expr] = depth

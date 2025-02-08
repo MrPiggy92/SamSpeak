@@ -16,7 +16,7 @@ TokenType = [
 
     # Keywords.
     "AND", "CLASS", "ELSE", "FALSE", "FN", "FOR", "IF", "NIL", "OR",
-    "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE",
+    "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE", "LM",
     
     # Types
     "NUM", "STR", "BOOL", "NIL", "LIST",
