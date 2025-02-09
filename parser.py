@@ -150,7 +150,7 @@ class Parser:
         self.currentBlock = previousBlock
         return statements
     def assignment(self):
-        expr = self.map()
+        expr = self.type_cast()
         #print(expr)
         #print(self.peek())
         if self.match("EQUAL"):
@@ -255,7 +255,6 @@ class Parser:
                 get = expr
                 return Set(get.object, get.name, value)
             self.error(equals, "Invalid assignment target.")
-        return expr
         return expr
     def type_cast(self):
         left = self.map()

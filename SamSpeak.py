@@ -4,6 +4,7 @@ if __name__ == "__main__":
     from parser import *
     from Interpreter import *
     from Resolver import *
+    from Preprocessor import *
 
 class SamSpeak:
     def __init__(self):
@@ -21,21 +22,23 @@ class SamSpeak:
     def runFile(self, path):
         with open(path) as file:
             code = file.read()
-        self.run(code, True)
+        self.run(code, path)
         if self.hadError: exit(65)
         if self.hadRuntimeError: exit(70)
     def runPrompt(self):
         while True:
             line = input(" > ").strip()
             if line == None: break
-            self.run(line, False)
+            self.run(line)
             self.hadError = False
-    def run(self, source, fromFile):
+    def run(self, source, fileName=False):
         try:
+            preprocessor = Preprocessor(fileName, self, source)
+            source = '\n'.join(preprocessor.preprocess())
             scanner = Scanner(source, self)
             tokens = scanner.scanTokens()
-            parser = Parser(tokens, self, fromFile)
-            if fromFile:
+            parser = Parser(tokens, self, fileName)
+            if fileName:
                 args = list(sys.argv)
                 args.pop(0)
                 args.pop(0)

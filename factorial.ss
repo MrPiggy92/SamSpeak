@@ -1,3 +1,4 @@
+#bob
 fn factorial_iterative (n) {
     if (n < 0) return 1;
     var result := 1;
@@ -12,7 +13,7 @@ fn factorial_recursive (n) {
     else return n * factorial_recursive (n-1);
 }
 
-fn main (args) {
+fn factorial () {
     var num := input("Enter a number: ");
     num = num :Num;
     num = round(num);

@@ -1,4 +1,4 @@
-
+#factorial
 fn main (args) {
     var a = [1 2 3];
     a[0] = 2;
@@ -8,5 +8,7 @@ fn main (args) {
     var b = {1:2 3:4};
     b[1] = 5;
     println(b);
+    factorial();
+    println(hi);
 }
 //TODO maps preprocessor bootstrap
