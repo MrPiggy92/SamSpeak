@@ -69,6 +69,12 @@ class Resolver:
         for item in expr.items:
             self.resolve(item)
         return None
+    def visitMapExpr(self, expr):
+        for item in expr.keys:
+            self.resolve(item)
+        for item in expr.values:
+            self.resolve(item)
+        return None
     def visitGetExpr(self, expr):
         self.resolve(expr.object)
         return None
@@ -105,6 +111,11 @@ class Resolver:
     def visitAccessExpr(self, expr):
         self.resolve(expr.accessee)
         self.resolve(expr.index)
+        return None
+    def visitChAccessExpr(self, expr):
+        self.resolve(expr.name)
+        self.resolve(expr.index)
+        self.resolve(expr.value)
         return None
     def visitTypeCastExpr(self, expr):
         self.resolve(expr.left)
@@ -147,9 +158,14 @@ class Resolver:
         self.scopes[-1][name.lexeme] = True
     def resolveLocal(self, expr, name):
         for i in range(len(self.scopes)-1, -1, -1):
+            #print(self.scopes[i].keys())
+            #print(name.lexeme)
+            #print(name.lexeme in self.scopes[i].keys())
             if name.lexeme in self.scopes[i].keys():
                 self.interpeter.resolve(expr, len(self.scopes)-1-i)
+                #print("hello")
                 return
+        #print("hi")
     def resolveFunction(self, function, type):
         enclosingFunction = self.currentFunction
         self.currentFunction = type

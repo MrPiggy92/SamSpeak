@@ -35,7 +35,7 @@ class Parser:
     def varDeclaration(self):
         name = self.consume("IDENTIFIER", "Expect variable name.")
         initialiser = None
-        if self.match("COLON_EQUAL"):
+        if self.match("COLON_EQUAL", "EQUAL"):
             initialiser = self.expression()
         elif self.match("EQUAL"):
             self.error(self.previous(), "Can't declare variables without :=")
@@ -150,18 +150,22 @@ class Parser:
         self.currentBlock = previousBlock
         return statements
     def assignment(self):
-        expr = self.list()
+        expr = self.map()
         #print(expr)
         #print(self.peek())
         if self.match("EQUAL"):
             equals = self.previous()
             value = self.assignment()
+            #print(expr)
             if type(expr) == Variable:
                 name = expr.name
                 return Assign(name, value)
             elif type(expr) == Get:
                 get = expr
                 return Set(get.object, get.name, value)
+            elif type(expr) == Access:
+                #print(expr.accessee)
+                return ChAccess(expr.accessee, expr.index, value)
             self.error(equals, "Invalid assignment target.")
         elif self.match("PLUS_EQUAL"):
             equals = self.previous()
@@ -253,22 +257,38 @@ class Parser:
             self.error(equals, "Invalid assignment target.")
         return expr
         return expr
+    def type_cast(self):
+        left = self.map()
+        while self.match("COLON"):
+            colon = self.previous()
+            right = self.map()
+            left = TypeCast(left, colon, right)
+        return left
+    def map(self):
+        if self.match("LEFT_BRACE"):
+            keys = []
+            values = []
+            while not self.match("RIGHT_BRACE"):
+                item1 = self.list()
+                #print(item1)
+                self.consume("COLON", "Expect ':' between map items.")
+                item2 = self.list()
+                #print(item2)
+                keys.append(item1)
+                values.append(item2)
+                #print()
+            return Map(keys, values)
+        else:
+            return self.list()
     def list(self):
         if self.match("LEFT_BRACKET"):
             contents = []
             while not self.match("RIGHT_BRACKET"):
-                item = self.type_cast()
+                item = self.logicalOr()
                 contents.append(item)
             return List(contents)
         else:
-            return self.type_cast()
-    def type_cast(self):
-        left = self.logicalOr()
-        while self.match("COLON"):
-            colon = self.previous()
-            right = self.logicalOr()
-            left = TypeCast(left, colon, right)
-        return left
+            return self.logicalOr()
     def logicalOr(self):
         expr = self.logicalAnd()
         while self.match("OR"):

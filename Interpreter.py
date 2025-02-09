@@ -109,6 +109,13 @@ class Interpreter:
             contents.append(self.evaluate(item))
         #print(contents)
         return contents
+    def visitMapExpr(self, expr):
+        contents = {}
+        for key, value in zip(expr.keys, expr.values):
+            newDict = {self.evaluate(key): self.evaluate(value)}
+            #print(newDict)
+            contents.update(newDict)
+        return contents
     def visitVariableExpr(self, expr):
         return self.lookUpVariable(expr.name, expr)
     def lookUpVariable(self, name, expr):
@@ -165,11 +172,40 @@ class Interpreter:
         accessee = self.evaluate(expr.accessee)
         #print(f"h{accessee}h")
         index = self.evaluate(expr.index)
-        if type(accessee) not in  [list, str]:
-            raise SamSpeakRuntimeError(expr.bracket, "Can only access elements of lists or strings.")
-        if index >= len(accessee):
+        #print(type(accessee))
+        #print(accessee)
+        if type(accessee) not in  [list, str, dict]:
+            raise SamSpeakRuntimeError(expr.bracket, "Can only access elements of lists, maps or strings.")
+        if index >= len(accessee) and type(accessee) != dict:
             raise SamSpeakRuntimeError(expr.bracket, "List index greater than list length.")
+        elif type(accessee) == dict and index not in accessee.keys():
+            raise SamSpeakRuntimeError(expr.bracket, "Key not in map.")
         return accessee[int(index)]
+    def visitChAccessExpr(self, expr):
+        #print(self.environment.values)
+        accessee = self.evaluate(expr.name)
+        index = int(self.evaluate(expr.index))
+        value = self.evaluate(expr.value)
+        #print(self.locals)
+        #print(expr.name in self.locals)
+        #print(expr.name)
+        if type(accessee) not in  [list, str, dict]:
+            raise SamSpeakRuntimeError(expr.name.name, "Can only access elements of lists, maps or strings.")
+        if index >= len(accessee) and type(accessee) != dict:
+            raise SamSpeakRuntimeError(expr.name.name, "List index greater than list length.")
+        elif type(accessee) == dict and index not in accessee.keys():
+            raise SamSpeakRuntimeError(expr.name.name, "Key not in map.")
+        try:
+            distance = self.locals[expr.name]
+            accessee[index] = value
+            #print(self.environment.values)
+            self.environment.assignAt(distance, expr.name.name, accessee)
+        except Exception as e:
+            #print(e)
+            #print(accessee)
+            accessee[index] = value
+            self.globals.assign(expr.name.name, accessee)
+        return accessee
     def visitTypeCastExpr(self, expr):
         left = self.evaluate(expr.left)
         if type(expr.new_type) != Type:
@@ -289,5 +325,15 @@ class Interpreter:
             stringified = '['
             stringified += ' '.join(strList)
             stringified += ']'
+            return stringified
+        elif type(value) == dict:
+            stringified = '{'
+            for key, value in zip(value.keys(), value.values()):
+                stringified += self.stringify(key)
+                stringified += ':'
+                stringified += self.stringify(value)
+                stringified += ' '
+            stringified = stringified[:-1]
+            stringified += '}'
             return stringified
         return str(value)

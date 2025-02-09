@@ -15,6 +15,7 @@ class GenerateAst:
         "Get        : object, name",
         "Grouping   : expression",
         "List       : items",
+        "Map        : keys, values",
         "Literal    : value",
         "Logical    : left, operator, right",
         "Set        : object, name, value",
@@ -24,7 +25,8 @@ class GenerateAst:
         "Variable   : name",
         "TypeCast   : left, colon, new_type",
         "Type       : name",
-        "Lambda     : params, body"
+        "Lambda     : params, body",
+        "ChAccess   : name, index, value"
         ])
         self.defineAst(outputDir, "Stmt", [
         "Block      : statements",

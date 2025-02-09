@@ -55,6 +55,14 @@ class List:
         return visitor.visitListExpr(self)
     def __repr__(self):
         return f"List: (items: {self.items})"
+class Map:
+    def __init__(self, keys, values):
+        self.keys = keys
+        self.values = values
+    def accept(self, visitor):
+        return visitor.visitMapExpr(self)
+    def __repr__(self):
+        return f"Map: (keys: {self.keys}, values: {self.values})"
 class Literal:
     def __init__(self, value):
         self.value = value
@@ -134,3 +142,12 @@ class Lambda:
         return visitor.visitLambdaExpr(self)
     def __repr__(self):
         return f"Lambda: (params: {self.params}, body: {self.body})"
+class ChAccess:
+    def __init__(self, name, index, value):
+        self.name = name
+        self.index = index
+        self.value = value
+    def accept(self, visitor):
+        return visitor.visitChAccessExpr(self)
+    def __repr__(self):
+        return f"ChAccess: (name: {self.name}, index: {self.index}, value: {self.value})"

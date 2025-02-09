@@ -1,11 +1,12 @@
+
 fn main (args) {
-    println("hi");
-    run(lm () {println("hello");});
-    fn hi () {println("helo");}
-    run(hi);
-    lm (n) {println("bye");println(n);} (5);
-}
-fn run (fun) {
-    fun();
+    var a = [1 2 3];
+    a[0] = 2;
+    println(a);
+    a[1] = 5;
+    println(a);
+    var b = {1:2 3:4};
+    b[1] = 5;
+    println(b);
 }
 //TODO maps preprocessor bootstrap

@@ -29,13 +29,18 @@ class Environment:
     def assignAt(self, distance, name, value):
         self.ancestor(distance).values[name.lexeme] = value
     def assign(self, name, value):
+        #print(type(name))
+        #print(name)
+        #print()
         #print(f"Assigning value {str(value)} to variable {name}")
+        #print(self.values.keys())
         if name.lexeme in self.values.keys():
             #print("found")
             self.values[name.lexeme] = value
             #print(self.values[name.lexeme])
             return
         elif self.enclosing != None:
+            #print(2)
             self.enclosing.assign(name, value)
             return
         #print(self.values[name.lexeme])
