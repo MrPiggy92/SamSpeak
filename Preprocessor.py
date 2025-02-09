@@ -1,3 +1,5 @@
+import os
+
 class Preprocessor:
     def __init__(self, filename, SamSpeak, code):
         self.filesRead = [filename]
@@ -6,11 +8,14 @@ class Preprocessor:
     def preprocess(self):
         for num, line in enumerate(self.code):
             if line.startswith('#'):
+                self.code.pop(num)
+                if not os.path.exists(f"{line[1:]}.ss"):
+                    self.SamSpeak.error(num+1, "File does not exist")
+                    continue
                 if f"{line[1:]}.ss" in self.filesRead:
                     continue
                 else:
                     self.filesRead.append(f"{line[1:]}.ss")
-                self.code.pop(num)
                 with open(f"{line[1:]}.ss") as file:
                     lineNum = 0
                     for line in file.readlines():
