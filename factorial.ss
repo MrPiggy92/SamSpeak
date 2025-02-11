@@ -1,4 +1,4 @@
-#bob
+
 fn factorial_iterative (n) {
     if (n < 0) return 1;
     var result := 1;

@@ -12,13 +12,14 @@ class SamSpeak:
         self.hadRuntimeError = False
         self.interpreter = Interpreter(self)
     def main(self):
+        self.runFile("test.ss")
         #if len(sys.argv) > 2:
         #    print("Usage: python3 SamSpeak.py [script]")
         #    exit(64)
-        if len(sys.argv) >= 2:
-            self.runFile(sys.argv[1])
-        else:
-            self.runPrompt()
+        #if len(sys.argv) >= 2:
+        #    self.runFile(sys.argv[1])
+        #else:
+        #    self.runPrompt()
     def runFile(self, path):
         with open(path) as file:
             code = file.read()
@@ -39,9 +40,10 @@ class SamSpeak:
             tokens = scanner.scanTokens()
             parser = Parser(tokens, self, fileName)
             if fileName:
-                args = list(sys.argv)
-                args.pop(0)
-                args.pop(0)
+                #args = list(sys.argv)
+                #args.pop(0)
+                #args.pop(0)
+                args = []
                 statements = parser.parse(args)
             else:
                 statements = parser.parse()

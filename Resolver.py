@@ -129,6 +129,10 @@ class Resolver:
         self.resolve(expr.left)
         self.resolve(expr.right)
         return None
+    def visitInExpr(self, expr):
+        self.resolve(expr.left)
+        self.resolve(expr.right)
+        return None
     def visitUnaryExpr(self, expr):
         self.resolve(expr.right)
         return None

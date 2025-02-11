@@ -151,3 +151,12 @@ class ChAccess:
         return visitor.visitChAccessExpr(self)
     def __repr__(self):
         return f"ChAccess: (name: {self.name}, index: {self.index}, value: {self.value})"
+class In:
+    def __init__(self, left, operator, right):
+        self.left = left
+        self.operator = operator
+        self.right = right
+    def accept(self, visitor):
+        return visitor.visitInExpr(self)
+    def __repr__(self):
+        return f"In: (left: {self.left}, operator: {self.operator}, right: {self.right})"

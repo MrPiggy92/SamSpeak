@@ -18,6 +18,11 @@ class Interpreter:
         self.globals.define("println", Println())
         self.globals.define("random", Random())
         self.globals.define("round", Round())
+        self.globals.define("floor", Floor())
+        self.globals.define("ceil", Ceil())
+        self.globals.define("length", Length())
+        self.globals.define("split", Split())
+        self.globals.define("keys", Keys())
         self.locals = {}
         self.currentBlock = "NONE"
     def interpret(self, statements):
@@ -88,6 +93,12 @@ class Interpreter:
             self.checkNumberOperands(expr.operator, left, right)
             return float(left) * float(right)
         elif expr.operator.type == "PLUS":
+            if type(left) == list or type(right) == list:
+                if type(left) == type(right): return left + right
+                if type(left) == list:
+                    return left + [right]
+                else:
+                    return [left] + right
             if type(left) == float and type(right) == float:
                 return float(left) + float(right)
             elif type(left) == str and type(right) == str:
@@ -116,6 +127,17 @@ class Interpreter:
             #print(newDict)
             contents.update(newDict)
         return contents
+    def visitInExpr(self, expr):
+        left = self.evaluate(expr.left)
+        right = self.evaluate(expr.right)
+        if type(right) == list:
+            return left in right
+        elif type(right) == dict:
+            return left in list(right.keys()) or left in list(right.values())
+        #elif type(right) == str:
+        #
+        else:
+            raise SamSpeakRuntimeError(expr.operator, f"Can't check if a value is in a {type(expr.right)}.")
     def visitVariableExpr(self, expr):
         return self.lookUpVariable(expr.name, expr)
     def lookUpVariable(self, name, expr):
@@ -172,33 +194,46 @@ class Interpreter:
         accessee = self.evaluate(expr.accessee)
         #print(f"h{accessee}h")
         index = self.evaluate(expr.index)
+        if type(index) == float and type(accessee) in [list, str]: index = int(index)
+        elif type(index) == float and type(accessee) == dict and index not in accessee.keys(): index = int(index)
         #print(type(accessee))
-        #print(accessee)
+        #if type(accessee) == dict: print(accessee.keys())
         if type(accessee) not in  [list, str, dict]:
             raise SamSpeakRuntimeError(expr.bracket, "Can only access elements of lists, maps or strings.")
-        if index >= len(accessee) and type(accessee) != dict:
+        if type(accessee) != dict and index >= len(accessee):
             raise SamSpeakRuntimeError(expr.bracket, "List index greater than list length.")
         elif type(accessee) == dict and index not in accessee.keys():
             raise SamSpeakRuntimeError(expr.bracket, "Key not in map.")
-        return accessee[int(index)]
+        return accessee[index]
     def visitChAccessExpr(self, expr):
         #print(self.environment.values)
         accessee = self.evaluate(expr.name)
-        index = int(self.evaluate(expr.index))
+        index = self.evaluate(expr.index)
+        if type(index) == float and type(accessee) == list: index = int(index)
+        elif type(index) == float and type(accessee) == dict and index not in accessee.keys(): index = int(index)
         value = self.evaluate(expr.value)
         #print(self.locals)
         #print(expr.name in self.locals)
         #print(expr.name)
         if type(accessee) not in  [list, str, dict]:
             raise SamSpeakRuntimeError(expr.name.name, "Can only access elements of lists, maps or strings.")
-        if index >= len(accessee) and type(accessee) != dict:
-            raise SamSpeakRuntimeError(expr.name.name, "List index greater than list length.")
-        elif type(accessee) == dict and index not in accessee.keys():
-            raise SamSpeakRuntimeError(expr.name.name, "Key not in map.")
+        #if index >= len(accessee) and type(accessee) != dict:
+        #    raise SamSpeakRuntimeError(expr.name.name, "List index greater than list length.")
+        #elif type(accessee) == dict and index not in accessee.keys():
+        #    raise SamSpeakRuntimeError(expr.name.name, "Key not in map.")
         try:
             distance = self.locals[expr.name]
+            #print(distance)
+            if type(accessee) == str:
+                accessee = [char for char in accessee]
+                accessee[index] = value
+                accessee = ''.join(accessee)
+            elif type(accessee) == list:
+                while len(accessee) <= index:
+                    accessee.append(None)
             accessee[index] = value
             #print(self.environment.values)
+            #print("hello")
             self.environment.assignAt(distance, expr.name.name, accessee)
         except Exception as e:
             #print(e)
@@ -211,13 +246,22 @@ class Interpreter:
         if type(expr.new_type) != Type:
             raise SamSpeakRuntimeError(expr.colon, "Can only cast to a builtin type.")
         if expr.new_type.name.type == "NUM":
-            return float(left)
+            try:
+                return float(left)
+            except:
+                raise SamSpeakRuntimeError(expr.colon, f"Can't convert {left} to {expr.new_type.name.lexeme}")
         elif expr.new_type.name.type == "STR":
-            return self.stringify(left)
+            try:
+                return self.stringify(left)
+            except:
+                raise SamSpeakRuntimeError(expr.colon, f"Can't convert {left} to {expr.new_type.name.lexeme}")
         elif expr.new_type.name.type == "NIL":
             return None
         elif expr.new_type.name.type == "LIST":
-            return list(left)
+            try:
+                return list(left)
+            except:
+                raise SamSpeakRuntimeError(expr.colon, f"Can't convert {left} to {expr.new_type.name.lexeme}")
         elif expr.new_type.name.type == "BOOL":
             return self.isTruthy(left)
     def visitMeExpr(self, expr):
@@ -333,7 +377,7 @@ class Interpreter:
                 stringified += ':'
                 stringified += self.stringify(value)
                 stringified += ' '
-            stringified = stringified[:-1]
+            if stringified.endswith(' '): stringified = stringified[:-1]
             stringified += '}'
             return stringified
         return str(value)

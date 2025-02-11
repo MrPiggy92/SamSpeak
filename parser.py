@@ -177,6 +177,9 @@ class Parser:
             elif type(expr) == Get:
                 get = expr
                 return Set(get.object, get.name, value)
+            elif type(expr) == Access:
+                #print(expr.accessee)
+                return ChAccess(expr.accessee, expr.index, value)
             self.error(equals, "Invalid assignment target.")
         elif self.match("MINUS_EQUAL"):
             equals = self.previous()
@@ -188,6 +191,9 @@ class Parser:
             elif type(expr) == Get:
                 get = expr
                 return Set(get.object, get.name, value)
+            elif type(expr) == Access:
+                #print(expr.accessee)
+                return ChAccess(expr.accessee, expr.index, value)
             self.error(equals, "Invalid assignment target.")
         elif self.match("STAR_EQUAL"):
             equals = self.previous()
@@ -199,6 +205,9 @@ class Parser:
             elif type(expr) == Get:
                 get = expr
                 return Set(get.object, get.name, value)
+            elif type(expr) == Access:
+                #print(expr.accessee)
+                return ChAccess(expr.accessee, expr.index, value)
             self.error(equals, "Invalid assignment target.")
         elif self.match("SLASH_EQUAL"):
             equals = self.previous()
@@ -210,6 +219,9 @@ class Parser:
             elif type(expr) == Get:
                 get = expr
                 return Set(get.object, get.name, value)
+            elif type(expr) == Access:
+                #print(expr.accessee)
+                return ChAccess(expr.accessee, expr.index, value)
             self.error(equals, "Invalid assignment target.")
         elif self.match("MODULO_EQUAL"):
             equals = self.previous()
@@ -221,6 +233,9 @@ class Parser:
             elif type(expr) == Get:
                 get = expr
                 return Set(get.object, get.name, value)
+            elif type(expr) == Access:
+                #print(expr.accessee)
+                return ChAccess(expr.accessee, expr.index, value)
             self.error(equals, "Invalid assignment target.")
         elif self.match("UP_ARROW_EQUAL"):
             equals = self.previous()
@@ -232,6 +247,9 @@ class Parser:
             elif type(expr) == Get:
                 get = expr
                 return Set(get.object, get.name, value)
+            elif type(expr) == Access:
+                #print(expr.accessee)
+                return ChAccess(expr.accessee, expr.index, value)
             self.error(equals, "Invalid assignment target.")
         elif self.match("PLUS_PLUS"):
             equals = self.previous()
@@ -243,6 +261,9 @@ class Parser:
             elif type(expr) == Get:
                 get = expr
                 return Set(get.object, get.name, value)
+            elif type(expr) == Access:
+                #print(expr.accessee)
+                return ChAccess(expr.accessee, expr.index, value)
             self.error(equals, "Invalid assignment target.")
         elif self.match("MINUS_MINUS"):
             equals = self.previous()
@@ -254,6 +275,9 @@ class Parser:
             elif type(expr) == Get:
                 get = expr
                 return Set(get.object, get.name, value)
+            elif type(expr) == Access:
+                #print(expr.accessee)
+                return ChAccess(expr.accessee, expr.index, value)
             self.error(equals, "Invalid assignment target.")
         return expr
     def type_cast(self):
@@ -312,11 +336,18 @@ class Parser:
             expr = Binary(expr, operator, right)
         return expr
     def comparison(self):
-        expr = self.mod()
+        expr = self.inExpr()
         while self.match("GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL"):
             operator = self.previous()
-            right = self.mod()
+            right = self.inExpr()
             expr = Binary(expr, operator, right)
+        return expr
+    def inExpr(self):
+        expr = self.mod()
+        while self.match("IN"):
+            operator = self.previous()
+            right = self.mod()
+            expr = In(expr, operator, right)
         return expr
     def mod(self):
         expr = self.term()
@@ -350,7 +381,7 @@ class Parser:
         #print(expr)
         while True:
             if self.match("LEFT_BRACKET"):
-                index = self.call()
+                index = self.expression()
                 close = self.consume("RIGHT_BRACKET", "Expect ']' after list access.")
                 expr = Access(expr, close, index)
             else:

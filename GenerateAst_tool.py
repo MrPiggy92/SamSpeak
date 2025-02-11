@@ -26,7 +26,8 @@ class GenerateAst:
         "TypeCast   : left, colon, new_type",
         "Type       : name",
         "Lambda     : params, body",
-        "ChAccess   : name, index, value"
+        "ChAccess   : name, index, value",
+        "In         : left, operator, right"
         ])
         self.defineAst(outputDir, "Stmt", [
         "Block      : statements",

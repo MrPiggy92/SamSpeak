@@ -25,8 +25,13 @@ class Environment:
         #print("bye")
         raise SamSpeakRuntimeError(name, f"Undefined variable '{name.lexeme}'.")
     def getAt(self, distance, name):
+        #print(name)
+        #print(self.ancestor(distance).values)
         return self.ancestor(distance).values[name]
     def assignAt(self, distance, name, value):
+        #print("hi")
+        #print(name)
+        #print(self.ancestor(distance).values)
         self.ancestor(distance).values[name.lexeme] = value
     def assign(self, name, value):
         #print(type(name))
