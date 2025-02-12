@@ -40,7 +40,7 @@ class Parser:
         elif self.match("EQUAL"):
             self.error(self.previous(), "Can't declare variables without :=")
             raise self.error(self.previous(), "Can't declare variables without :=")
-        self.consume("SEMICOLON", "Expect ';' after variable declaration.")
+        #self.consume("SEMICOLON", "Expect ';' after variable declaration.")
         return Var(name, initialiser)
     def classDeclaration(self):
         name = self.consume("IDENTIFIER", "Expect class name.")
@@ -48,11 +48,11 @@ class Parser:
         if self.match("LESS"):
             self.consume("IDENTIFIER", "Expect superclass name.")
             superclass = Variable(self.previous())
-        self.consume("LEFT_BRACE", "Expect '{' before class body")
+        self.consume("COLON", "Expect ':' before class body")
         methods = []
-        while not(self.check("RIGHT_BRACE")) and not(self.isAtEnd()):
+        while not(self.check("SEMICOLON")) and not(self.isAtEnd()):
             methods.append(self.function("method"))
-        self.consume("RIGHT_BRACE", "Expect '}' after class body")
+        self.consume("SEMICOLON", "Expect ';' after class body")
         return Class(name, superclass, methods)
     def statement(self):
         stmt = None
@@ -60,7 +60,7 @@ class Parser:
         elif self.match("IF"): stmt = self.ifStatement()
         elif self.match("WHILE"): stmt = self.whileStatement()
         elif self.match("FOR"): stmt = self.forStatement()
-        elif self.match("LEFT_BRACE"): stmt = Block(self.block())
+        elif self.match("COLON"): stmt = Block(self.block())
         elif self.match("RETURN"): stmt = self.returnStatement()
         if stmt == None: stmt = self.expressionStatement()
         if not self.currentBlock and self.file:
@@ -88,6 +88,7 @@ class Parser:
             initialiser = None
         elif self.match("VAR"):
             initialiser = self.varDeclaration()
+            self.consume("SEMICOLON", "Expect ';' after initialiser")
         else:
             initialiser = self.expressionStatement()
         if not self.check("SEMICOLON"):
@@ -110,10 +111,10 @@ class Parser:
         return body
     def returnStatement(self):
         keyword = self.previous()
-        value = None
-        if not self.check("SEMICOLON"):
-            value = self.expression()
-        self.consume("SEMICOLON", "Expect ';' after return value.")
+        value = self.expression()
+        #if not self.check("SEMICOLON"):
+        #    value = self.expression()
+        #self.consume("SEMICOLON", "Expect ';' after return value.")
         return Return(keyword, value)
     def expressionStatement(self):
         expr = self.expression()
@@ -123,7 +124,7 @@ class Parser:
         #print(expr.arguments)
         #print(expr.arguments[0])
         #print(expr.arguments[0].name)
-        self.consume("SEMICOLON", "Expect ';' after value.")
+        #self.consume("SEMICOLON", "Expect ';' after value.")
         return Expression(expr)
     def function(self, kind):
         name = self.consume("IDENTIFIER", f"Expect {kind} name.")
@@ -136,7 +137,7 @@ class Parser:
                     self.error(self.peek(), "Can't have more than 255 paramaters.")
                 parameters.append(self.consume("IDENTIFIER", "Expect paramter name."))
         self.consume("RIGHT_PAREN", "Expect ')' after parameters.")
-        self.consume("LEFT_BRACE", "Expect '{' before " + kind + " body.")
+        self.consume("COLON", "Expect ':' before " + kind + " body.")
         body = self.block()
         if name.lexeme == "main": self.mainFunction = True
         return Function(name, parameters, body)
@@ -144,9 +145,9 @@ class Parser:
         previousBlock = self.currentBlock
         self.currentBlock = True
         statements = []
-        while (not self.check("RIGHT_BRACE")) and (not self.isAtEnd()):
+        while (not self.check("SEMICOLON")) and (not self.isAtEnd()):
             statements.append(self.declaration())
-        self.consume("RIGHT_BRACE", "Expect '}' after block.")
+        self.consume("SEMICOLON", "Expect ';' after block.")
         self.currentBlock = previousBlock
         return statements
     def assignment(self):
@@ -409,7 +410,7 @@ class Parser:
                         self.error(self.peek(), "Can't have more than 255 paramaters.")
                     parameters.append(self.consume("IDENTIFIER", "Expect paramter name."))
             self.consume("RIGHT_PAREN", "Expect ')' after parameters.")
-            self.consume("LEFT_BRACE", "Expect '{' before lambda body.")
+            self.consume("COLON", "Expect '{' before lambda body.")
             body = self.block()
             return Lambda(parameters, body)
         else:
