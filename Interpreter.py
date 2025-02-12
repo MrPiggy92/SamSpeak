@@ -4,27 +4,24 @@ from SamSpeakCallable import *
 from SamSpeakFunction import *
 from Return import *
 from SamSpeakClass import *
-from Builtins import *
+#from Builtins import *
 from Expr import *
 import time
+import importlib
 
 class Interpreter:
     def __init__(self, SamSpeak):
         self.SamSpeak_class = SamSpeak
         self.globals = Environment()
         self.environment = self.globals
-        self.globals.define("clock", Clock())
-        self.globals.define("input", Input())
-        self.globals.define("println", Println())
-        self.globals.define("random", Random())
-        self.globals.define("round", Round())
-        self.globals.define("floor", Floor())
-        self.globals.define("ceil", Ceil())
-        self.globals.define("length", Length())
-        self.globals.define("split", Split())
-        self.globals.define("keys", Keys())
+        self.modules = {"time": "SSTime", "io": "SSIo", "random": "SSRandom", "data": "SSLists", "math": "SSMath"}
         self.locals = {}
         self.currentBlock = "NONE"
+    def addModule(self, module):
+        if module in self.modules.keys():
+            module = importlib.import_module(self.modules[module])
+            for func in module.builtins.keys():
+                self.globals.define(func, module.builtins[func])
     def interpret(self, statements):
         try:
             for statement in statements:

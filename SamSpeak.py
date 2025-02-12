@@ -36,6 +36,7 @@ class SamSpeak:
         try:
             preprocessor = Preprocessor(fileName, self, source)
             source = '\n'.join(preprocessor.preprocess())
+            #print(source)
             scanner = Scanner(source, self)
             tokens = scanner.scanTokens()
             parser = Parser(tokens, self, fileName)

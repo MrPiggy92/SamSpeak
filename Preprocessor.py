@@ -22,4 +22,9 @@ class Preprocessor:
                         self.code.insert(num+lineNum, line.strip())
                         lineNum += 1
                 self.code = self.preprocess()
+            elif line.startswith('!'):
+                #print(line[1:])
+                self.code.pop(num)
+                self.SamSpeak.interpreter.addModule(line[1:])
+                self.code = self.preprocess()
         return self.code
