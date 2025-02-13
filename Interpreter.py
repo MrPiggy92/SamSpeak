@@ -324,6 +324,12 @@ class Interpreter:
         while self.isTruthy(self.evaluate(stmt.condition)):
             self.execute(stmt.body)
         return None
+    def visitTryStmt(self, stmt):
+        try:
+            self.execute(stmt.contents)
+        except SamSpeakRuntimeError:
+            if stmt.catch != None:
+                self.execute(stmt.catch)
     def executeBlock(self, statements, environment):
         previous = self.environment
         try:

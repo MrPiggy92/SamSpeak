@@ -60,6 +60,7 @@ class Parser:
         elif self.match("IF"): stmt = self.ifStatement()
         elif self.match("WHILE"): stmt = self.whileStatement()
         elif self.match("FOR"): stmt = self.forStatement()
+        elif self.match("TRY"): stmt = self.tryStatement()
         elif self.match("COLON"): stmt = Block(self.block())
         elif self.match("RETURN"): stmt = self.returnStatement()
         if stmt == None: stmt = self.expressionStatement()
@@ -109,6 +110,13 @@ class Parser:
         if initialiser != None:
             body = Block([initialiser, body])
         return body
+    def tryStatement(self):
+        content = self.statement()
+        if self.match("CATCH"):
+            catch = self.statement()
+        else:
+            catch = None
+        return Try(content, catch)
     def returnStatement(self):
         keyword = self.previous()
         value = self.expression()

@@ -63,3 +63,11 @@ class While:
         return visitor.visitWhileStmt(self)
     def __repr__(self):
         return f"While: (condition: {self.condition}, body: {self.body})"
+class Try:
+    def __init__(self, contents, catch):
+        self.contents = contents
+        self.catch = catch
+    def accept(self, visitor):
+        return visitor.visitTryStmt(self)
+    def __repr__(self):
+        return f"Try: (contents: {self.contents}, catch: {self.catch})"

@@ -12,7 +12,7 @@ class SamSpeak:
         self.hadRuntimeError = False
         self.interpreter = Interpreter(self)
     def main(self):
-        self.runFile("factorial.ss")
+        self.runFile("test.ss")
         #if len(sys.argv) > 2:
         #    print("Usage: python3 SamSpeak.py [script]")
         #    exit(64)

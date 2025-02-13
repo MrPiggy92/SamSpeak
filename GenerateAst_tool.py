@@ -37,7 +37,8 @@ class GenerateAst:
         "If         : condition, thenBranch, elseBranch",
         "Return     : keyword, value",
         "Var        : name, initialiser",
-        "While      : condition, body"
+        "While      : condition, body",
+        "Try        : contents, catch"
         ])
     def defineAst(self, outputDir, baseName, types):
         path = outputDir + '/' + baseName + ".py"

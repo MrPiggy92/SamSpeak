@@ -41,6 +41,10 @@ class Resolver:
     def visitWhileStmt(self, stmt):
         self.resolve(stmt.condition)
         self.resolve(stmt.body)
+    def visitTryStmt(self, stmt):
+        self.resolve(stmt.contents)
+        if stmt.catch != None:
+            self.resolve(stmt.catch)
     def visitClassStmt(self, stmt):
         enclosingClass = self.currentClass
         self.currentClass = "CLASS"
