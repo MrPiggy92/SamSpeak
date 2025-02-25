@@ -32,9 +32,9 @@ class Resolver:
         return None
     def visitReturnStmt(self, stmt):
         if self.currentFunction == "NONE":
-            self.SamSpeak.parseError(stmt.keyword, "Can't return from top-level code.")
+            self.SamSpeak.parseError(stmt.keyword, "You can't return from top-level code!")
         if self.currentFunction == "INITIALISER":
-            self.SamSpeak.parseError(stmt.keyword, "Can't return a value from an initialiser.")
+            self.SamSpeak.parseError(stmt.keyword, "Returning a value from an initialiser just makes errors!")
         self.resolve(stmt.value)
         return None
     def visitRaiseStmt(self, stmt):
@@ -52,7 +52,7 @@ class Resolver:
         self.declare(stmt.name)
         self.define(stmt.name)
         if stmt.superclass != None and stmt.name.lexeme == stmt.superclass.name.lexeme:
-            self.SamSpeak.parseError(stmt.superclass.name, "A class can't inherit from itself.")
+            self.SamSpeak.parseError(stmt.superclass.name, "A class can't inherit from itself! That's a paradox!")
         if stmt.superclass != None:
             self.currentClass = "SUBCLASS"
             self.resolve(stmt.superclass)
@@ -63,7 +63,7 @@ class Resolver:
         self.scopes[-1]["this"] = True
         for method in stmt.methods:
             declaration = "METHOD"
-            if method.name.lexeme == "init":
+            if method.name.lexeme == "new":
                 declaration = "INITIALISER"
             self.resolveFunction(method, declaration)
         self.endScope()
@@ -85,9 +85,9 @@ class Resolver:
         return None
     def visitSuperExpr(self, expr):
         if self.currentClass == "NONE":
-            self.SamSpeak.parseError(expr.keyword, "Can't use 'super' outside a class.")
+            self.SamSpeak.parseError(expr.keyword, "'super' doesn't mean anythign outside a class!")
         elif self.currentClass != "SUBCLASS":
-            self.SamSpeak.parseError(expr.keyword, "Can't use 'super' in a class with no superclass.")
+            self.SamSpeak.parseError(expr.keyword, "This class has no superclass!")
         self.resolveLocal(expr, expr.keyword)
         return None
     def visitSetExpr(self, expr):
@@ -99,7 +99,7 @@ class Resolver:
         #print(self.scopes[-1])
         try:
             if len(self.scopes) > 0 and not self.scopes[-1][expr.name.lexeme]:
-                self.SamSpeak.parseError(expr.name, "Can't read local variable in its own initialiser.")
+                self.SamSpeak.parseError(expr.name, "Trying to read a local variable in its own initialiser is just broken!")
         except:
             pass
         self.resolveLocal(expr, expr.name)
@@ -146,7 +146,7 @@ class Resolver:
         return None
     def visitMeExpr(self, expr):
         if self.currentClass == "NONE":
-            self.SamSpeak.parseError(expr.keyword, "Can't use 'me' outside of a class.")
+            self.SamSpeak.parseError(expr.keyword, "There is no class, so 'me' doesn't work!")
             return None
         self.resolveLocal(expr, expr.keyword)
         return None
@@ -160,7 +160,7 @@ class Resolver:
         if len(self.scopes) == 0: return
         scope = self.scopes[-1]
         if name.lexeme in scope.keys():
-            self.SamSpeak.parseError(name, "Already a variable with this name in this scope.")
+            self.SamSpeak.parseError(name, "There's already a variable with this name in this scope!")
         scope[name.lexeme] = False
     def define(self, name):
         if len(self.scopes) == 0: return

@@ -1,4 +1,4 @@
-from random import choice
+from random import choice, randint
 
 words = []
 with open("insults.txt") as insults:
@@ -9,15 +9,23 @@ with open("insults.txt") as insults:
             words.append(temp)
             temp = []
             continue
-        temp.append(line[:-1])
+        temp.append(line[:-1].lower())
     words.append(temp)
 #print(words)
+words2 = []
+with open("insults2.txt") as insults:
+    for line in insults.readlines():
+        words2.append(line[:-1])
+#print(words2)
 
 def genInsult():
-    insult = "You "
-    for section in words:
-        insult += choice(section)
-        insult += ' '
-    insult = insult[:-1]
-    insult += '!'
+    if randint(0,5) != 0:
+        insult = "You "
+        for section in words:
+            insult += choice(section)
+            insult += ' '
+        insult = insult[:-1]
+        insult += '!'
+    else:
+        insult = choice(words2)
     return insult

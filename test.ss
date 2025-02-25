@@ -1,21 +1,21 @@
 !io
 //#hi
-fn main (args) :
-    //@hi
-    println("hi)
-    try:
+class test :
+    new () :
         println("hello")
-        raise 5
-    ; catch :
+        println(me)
+        me.h = "what"
+    ;
+    sayWhat () :
+        println(me.h)
+    ;
+    hi () :
         println("hi")
     ;
-    try :
-        raise 5
-    ; catch :
-        println("hi")
-    ;
-    // raise
-    println(5 : Str )
-    println(5 + 3)
-    hi()
+;
+fn main (args) :
+    test.hi()
+    var h = test.new()
+    println(h)
+    h.sayWhat()
 ;

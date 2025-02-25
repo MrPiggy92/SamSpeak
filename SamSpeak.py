@@ -73,7 +73,12 @@ class SamSpeak:
         else:
             self.report(token.line, f"at '{token.lexeme}'", message, False)
     def report(self, line, where, message, runtime):
-        print(f"{genInsult()} {message}")
+        insult = genInsult()
+        if insult.endswith('!'):
+            print(f"{insult} {message}")
+        else:
+            message = message.replace('!', '.')
+            print(f"{insult} {message}")
         print(f"[line {line}]{(' Error ' + where) if where != '' else where}\n")
         if runtime: self.hadRuntimeError = True
         else: self.hadError = True

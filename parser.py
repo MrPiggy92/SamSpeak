@@ -62,7 +62,7 @@ class Parser:
         elif self.match("RAISE"): stmt = self.raiseStatement()
         if stmt == None: stmt = self.expressionStatement()
         if not self.currentBlock and self.file:
-            self.error(self.previous(), "Outside of the main function, you can only declare things! How do you not know this!?")
+            self.error(self.previous(), "Outside of the main function, you can only declare things! How do you not know this?")
             return
         return stmt
     def ifStatement(self):
@@ -148,7 +148,7 @@ class Parser:
         self.consume("RIGHT_PAREN", "I need ')' after the paramter list!")
         self.consume("COLON", f"I absolutely require ':' before {kind} body!")
         body = self.block()
-        if name.lexeme == "main": self.mainFunction = True
+        if name.lexeme == "main" and kind == "function": self.mainFunction = True
         return Function(name, parameters, body)
     def block(self):
         previousBlock = self.currentBlock
@@ -392,7 +392,7 @@ class Parser:
         while True:
             if self.match("LEFT_BRACKET"):
                 index = self.expression()
-                close = self.consume("RIGHT_BRACKET", "I expect ']' after list access.")
+                close = self.consume("RIGHT_BRACKET", "I expect ']' after list access!")
                 expr = Access(expr, close, index)
             else:
                 break
@@ -419,7 +419,7 @@ class Parser:
                         self.error(self.peek(), "Having more than 255 parameters is just greedy!")
                     parameters.append(self.consume("IDENTIFIER", "Tell us the parameter name!"))
             self.consume("RIGHT_PAREN", "Close the parameter list with ')'!")
-            self.consume("COLON", "Expect '{' before lambda body.")
+            self.consume("COLON", "You need to use ':' to start a lambda body!")
             body = self.block()
             return Lambda(parameters, body)
         else:
@@ -432,8 +432,8 @@ class Parser:
             return Literal(self.previous().literal)
         elif self.match("SUPER"):
             keyword = self.previous()
-            self.consume("DOT", "Expect '.' after 'super'.")
-            method = self.consume("IDENTIFIER", "Expect superclass method name.")
+            self.consume("DOT", "You need a dot to access superclass methods!")
+            method = self.consume("IDENTIFIER", "I can't run the superclass method without its name!")
             return Super(keyword, method)
         elif self.match("ME"):
             return Me(self.previous())
@@ -444,20 +444,20 @@ class Parser:
             return Type(self.previous())
         elif self.match("LEFT_PAREN"):
             expr = self.expression()
-            self.consume("RIGHT_PAREN", "Expect ')' after expression.")
+            self.consume("RIGHT_PAREN", "I need ')' after an expression!")
             return Grouping(expr)
         #if type(self.statements[-1]) == Function:
         #    
-        raise self.error(self.peek(), "Expect expression.")
+        raise self.error(self.peek(), "Give me an expression!")
     def finishCall(self, callee):
         arguments = []
         if not self.check("RIGHT_PAREN"):
             arguments.append(self.expression())
             while self.match("COMMA"):
                 if len(arguments) >= 255:
-                    self.error(self.peek(), "Can't have more than 255 arguments.")
+                    self.error(self.peek(), "Having more than 255 arguments is greedy!")
                 arguments.append(self.expression())
-        paren = self.consume("RIGHT_PAREN", "Expect ')' after arguments")
+        paren = self.consume("RIGHT_PAREN", "Close the paramter list with ')'!")
         return Call(callee, paren, arguments)
     def match(self, *args):
         for type in args:

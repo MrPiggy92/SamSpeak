@@ -4,8 +4,9 @@ from SamSpeakCallable import *
 from SamSpeakFunction import *
 from Return import *
 from SamSpeakClass import *
-#from Builtins import *
+from Token import *
 from Expr import *
+from Stmt import *
 import time
 import importlib
 
@@ -43,11 +44,13 @@ class Interpreter:
         object = self.evaluate(expr.object)
         if type(object) == SamSpeakInstance:
             return object.get(expr.name)
-        raise SamSpeakRuntimeError(expr.name, "Only instances have properties.")
+        elif type(object) == SamSpeakClass:
+            return object.findMethod(expr.name.lexeme)
+        raise SamSpeakRuntimeError(expr.name, "Only instances have properties!")
     def visitSetExpr(self, expr):
         object = self.evaluate(expr.object)
         if type(object) != SamSpeakInstance:
-            raise SamSpeakRuntimeError(expr.name, "Only instances have fields.")
+            raise SamSpeakRuntimeError(expr.name, "Only instances have fields!")
         value = self.evaluate(expr.value)
         object.set(expr.name, value)
         return value
@@ -84,7 +87,7 @@ class Interpreter:
         elif expr.operator.type == "SLASH":
             self.checkNumberOperands(expr.operator, left, right)
             if right == 0:
-                raise SamSpeakRuntimeError(expr.operator, "You can't divide by 0")
+                raise SamSpeakRuntimeError(expr.operator, "Dividing by 0 just doesn't work!")
             return float(left) / float(right)
         elif expr.operator.type == "STAR":
             self.checkNumberOperands(expr.operator, left, right)
@@ -100,7 +103,11 @@ class Interpreter:
                 return float(left) + float(right)
             elif type(left) == str and type(right) == str:
                 return self.stringify(left) + self.stringify(right)
-            raise SamSpeakRuntimeError(expr.operator, "Operands must be two numbers or two strigns.")
+            elif type(left) == list and type(right) == list:
+                return left + right
+            elif type(left) == dict and type(right) == dict:
+                return left.update(right)
+            raise SamSpeakRuntimeError(expr.operator, "You cna only add two numbers, strings, maps, or lists!")
         elif expr.operator.type == "MODULO":
             self.checkNumberOperands(expr.operator, left, right)
             return float(left) % float(right)
@@ -131,10 +138,13 @@ class Interpreter:
             return left in right
         elif type(right) == dict:
             return left in list(right.keys()) or left in list(right.values())
-        #elif type(right) == str:
-        #
-        else:
-            raise SamSpeakRuntimeError(expr.operator, f"Can't check if a value is in a {type(expr.right)}.")
+        elif type(right) == str:
+            return left in right
+        if type(right) == float:
+            message = "It is impossible to check if a value is in a number!"
+        elif right == None:
+            message = "It is impossible to check if a value is in nil!"
+        raise SamSpeakRuntimeError(expr.operator, message)
     def visitVariableExpr(self, expr):
         return self.lookUpVariable(expr.name, expr)
     def lookUpVariable(self, name, expr):
@@ -174,18 +184,21 @@ class Interpreter:
         return self.evaluate(expr.right)
     def visitCallExpr(self, expr):
         callee = self.evaluate(expr.callee)
+        if callee == None and type(expr.callee) == Get and expr.callee.name.lexeme == "new":
+            init = self.evaluate(expr.callee.object)
+            return init.new()
+        elif type(expr.callee) == Get and expr.callee.name.lexeme == "new":
+            init = self.evaluate(expr.callee.object)
+            initialiser = init.new()
+            callee = initialiser.get(Token("IDENTIFIER", "new", "new", -1))
         arguments = []
         for argument in expr.arguments:
-            #print(argument)
             arguments.append(self.evaluate(argument))
-            #print(arguments[-1])
         if not isinstance(callee, SamSpeakCallable):
-            #print(callee)
-            #print(type(callee))
-            raise SamSpeakRuntimeError(expr.paren, "Can only call functions and classes.")
+            raise SamSpeakRuntimeError(expr.paren, "I don't know how to call anything other than a function!")
         function = SamSpeakCallable(callee) # Callee
         if len(arguments) != function.arity():
-            raise SamSpeakRuntimeError(expr.paren, f"Expected {function.arity()} arguments but got {len(arguments)}.")
+            raise SamSpeakRuntimeError(expr.paren, f"I need {function.arity()} arguments but you gave me {len(arguments)}!")
         return function.call(self, arguments)
     def visitAccessExpr(self, expr):
         accessee = self.evaluate(expr.accessee)
@@ -196,11 +209,11 @@ class Interpreter:
         #print(type(accessee))
         #if type(accessee) == dict: print(accessee.keys())
         if type(accessee) not in  [list, str, dict]:
-            raise SamSpeakRuntimeError(expr.bracket, "Can only access elements of lists, maps or strings.")
+            raise SamSpeakRuntimeError(expr.bracket, "Numbers and nil don't have indices!")
         if type(accessee) != dict and index >= len(accessee):
-            raise SamSpeakRuntimeError(expr.bracket, "List index greater than list length.")
+            raise SamSpeakRuntimeError(expr.bracket, "The list index is greater than the list's length!")
         elif type(accessee) == dict and index not in accessee.keys():
-            raise SamSpeakRuntimeError(expr.bracket, "Key not in map.")
+            raise SamSpeakRuntimeError(expr.bracket, "The map doesn't hold the key!")
         return accessee[index]
     def visitChAccessExpr(self, expr):
         #print(self.environment.values)
@@ -213,7 +226,7 @@ class Interpreter:
         #print(expr.name in self.locals)
         #print(expr.name)
         if type(accessee) not in  [list, str, dict]:
-            raise SamSpeakRuntimeError(expr.name.name, "Can only access elements of lists, maps or strings.")
+            raise SamSpeakRuntimeError(expr.name.name, "Numbers and nil don't have indices!")
         #if index >= len(accessee) and type(accessee) != dict:
         #    raise SamSpeakRuntimeError(expr.name.name, "List index greater than list length.")
         #elif type(accessee) == dict and index not in accessee.keys():
@@ -241,24 +254,24 @@ class Interpreter:
     def visitTypeCastExpr(self, expr):
         left = self.evaluate(expr.left)
         if type(expr.new_type) != Type:
-            raise SamSpeakRuntimeError(expr.colon, "Can only cast to a builtin type.")
+            raise SamSpeakRuntimeError(expr.colon, "I have no clue what that type is!")
         if expr.new_type.name.type == "NUM":
             try:
                 return float(left)
             except:
-                raise SamSpeakRuntimeError(expr.colon, f"Can't convert {left} to {expr.new_type.name.lexeme}")
+                raise SamSpeakRuntimeError(expr.colon, f"Please tell me how to convert {left} to {expr.new_type.name.lexeme}!")
         elif expr.new_type.name.type == "STR":
             try:
                 return self.stringify(left)
             except:
-                raise SamSpeakRuntimeError(expr.colon, f"Can't convert {left} to {expr.new_type.name.lexeme}")
+                raise SamSpeakRuntimeError(expr.colon, f"Please tell me how to convert {left} to {expr.new_type.name.lexeme}!")
         elif expr.new_type.name.type == "NIL":
             return None
         elif expr.new_type.name.type == "LIST":
             try:
                 return list(left)
             except:
-                raise SamSpeakRuntimeError(expr.colon, f"Can't convert {left} to {expr.new_type.name.lexeme}")
+                raise SamSpeakRuntimeError(expr.colon, f"Please tell me how to convert {left} to {expr.new_type.name.lexeme}!")
         elif expr.new_type.name.type == "BOOL":
             return self.isTruthy(left)
     def visitMeExpr(self, expr):
@@ -269,10 +282,10 @@ class Interpreter:
     def visitSuperExpr(self, expr):
         distance = self.locals[expr]
         superclass = self.environment.getAt(distance, "super")
-        object = self.environment.getAt(distance-1, "this")
+        object = self.environment.getAt(distance-1, "me")
         method = superclass.findMethod(expr.method.lexeme)
         if method == None:
-            raise SamSpeakRuntimeError(expr.method, f"Undefined property '{expr.method.lexeme}'.")
+            raise SamSpeakRuntimeError(expr.method, f"What on earth does '{expr.method.lexeme}' mean?")
         return method.bind(object)
     def visitExpressionStmt(self, stmt):
         self.evaluate(stmt.expression)
@@ -302,15 +315,17 @@ class Interpreter:
         if stmt.superclass != None:
             superclass = self.evaluate(stmt.superclass)
             if type(superclass) != SamSpeakClass:
-                raise SamSpeakRuntimeError(stmt.superclass.name, "Superclass must be a class.")
+                raise SamSpeakRuntimeError(stmt.superclass.name, "Superclasses must be classes! It's in the name!")
         self.environment.define(stmt.name.lexeme, None)
         if stmt.superclass != None:
             self.environment = Environment(self.environment)
             self.environment.define("super", superclass)
         methods = {}
         for method in stmt.methods:
-            function = SamSpeakFunction(method, self.environment, method.name.lexeme == "init")
+            function = SamSpeakFunction(method, self.environment, method.name.lexeme == "new")
             methods[method.name.lexeme] = function
+        #if "new" not in methods.keys():
+        #    function = SamSpeakCallable()
         klass = SamSpeakClass(stmt.name.lexeme, superclass, methods)
         if superclass != None:
             self.environment = self.environment.enclosing
@@ -358,10 +373,10 @@ class Interpreter:
         return a == b
     def checkNumberOperand(self, operator, operand):
         if type(operand) == float: return
-        raise SamSpeakRuntimeError(operator, "Operand should be a number.")
+        raise SamSpeakRuntimeError(operator, "The operand must be a number!")
     def checkNumberOperands(self, operator, left, right):
         if type(left) == type(right) == float: return
-        raise SamSpeakRuntimeError(operator, "Operands must be numbers.")
+        raise SamSpeakRuntimeError(operator, "The operand must be a number!")
     def stringify(self, value):
         if value == None: return "nil"
         if type(value) == float:
