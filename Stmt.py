@@ -47,6 +47,14 @@ class Return:
         return visitor.visitReturnStmt(self)
     def __repr__(self):
         return f"Return: (keyword: {self.keyword}, value: {self.value})"
+class Raise:
+    def __init__(self, keyword, value):
+        self.keyword = keyword
+        self.value = value
+    def accept(self, visitor):
+        return visitor.visitRaiseStmt(self)
+    def __repr__(self):
+        return f"Raise: (keyword: {self.keyword}, value: {self.value})"
 class Var:
     def __init__(self, name, initialiser):
         self.name = name

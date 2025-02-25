@@ -6,7 +6,8 @@ class Scanner:
         "for", "fn", "if", "nil",
         "or", "return", "super",
         "me", "true", "var", "while",
-        "lm", "in", "try", "catch"
+        "lm", "in", "try", "catch",
+        "raise"
     ]
     types = [
         "Num", "Str", "Nil", "Bool", "List"
@@ -76,7 +77,7 @@ class Scanner:
         elif self.isAlpha(c): self.identifier()
         elif c in [' ', "\r", "\t"]: pass
         elif c == "\n": self.line += 1
-        else: self.SamSpeak_class.error(self.line, f"Unexpected character ({c}).")
+        else: self.SamSpeak_class.scanError(self.line, f"I don't even know what this character is! ({c}).")
     def advance(self):
         self.current += 1
         return self.source[self.current-1]
@@ -101,7 +102,7 @@ class Scanner:
             if self.peek() == "\n": self.line += 1
             self.advance()
         if self.isAtEnd():
-            self.SamSpeak_class.error(self.line, "Unterminated string.")
+            self.SamSpeak_class.scanError(self.line, "You never closed this string!")
             return
         self.advance()
         value = self.source[self.start+1 : self.current-1]

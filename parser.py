@@ -19,7 +19,7 @@ class Parser:
         if self.file:
             betterArgs = List([Literal(value) for value in args])
             if not self.mainFunction:
-                self.error(self.tokens[-1], "No main function.")
+                self.error(self.tokens[-1], "You haven't even made a main function!")
             mainCall = Call(Variable(Token("IDENTIFIER", "main", "main", -1)), Token("RIGHT_PAREN", None, ')', -1), [betterArgs])
             statements.append(mainCall)
         return statements
@@ -33,26 +33,22 @@ class Parser:
             self.synchronise()
             return None
     def varDeclaration(self):
-        name = self.consume("IDENTIFIER", "Expect variable name.")
+        name = self.consume("IDENTIFIER", "You're meant to tell us the variable name!")
         initialiser = None
         if self.match("COLON_EQUAL", "EQUAL"):
             initialiser = self.expression()
-        elif self.match("EQUAL"):
-            self.error(self.previous(), "Can't declare variables without :=")
-            raise self.error(self.previous(), "Can't declare variables without :=")
-        #self.consume("SEMICOLON", "Expect ';' after variable declaration.")
         return Var(name, initialiser)
     def classDeclaration(self):
-        name = self.consume("IDENTIFIER", "Expect class name.")
+        name = self.consume("IDENTIFIER", "You're meant to tell us the class name!")
         superclass = None
         if self.match("LESS"):
-            self.consume("IDENTIFIER", "Expect superclass name.")
+            self.consume("IDENTIFIER", "I need to know the name of the superclass!")
             superclass = Variable(self.previous())
-        self.consume("COLON", "Expect ':' before class body")
+        self.consume("COLON", "I need a colon before the class body, you know!")
         methods = []
         while not(self.check("SEMICOLON")) and not(self.isAtEnd()):
             methods.append(self.function("method"))
-        self.consume("SEMICOLON", "Expect ';' after class body")
+        self.consume("SEMICOLON", "You need to close the class body!")
         return Class(name, superclass, methods)
     def statement(self):
         stmt = None
@@ -63,45 +59,46 @@ class Parser:
         elif self.match("TRY"): stmt = self.tryStatement()
         elif self.match("COLON"): stmt = Block(self.block())
         elif self.match("RETURN"): stmt = self.returnStatement()
+        elif self.match("RAISE"): stmt = self.raiseStatement()
         if stmt == None: stmt = self.expressionStatement()
         if not self.currentBlock and self.file:
-            self.error(self.previous(), "Outside of main function, you can only declare things.")
+            self.error(self.previous(), "Outside of the main function, you can only declare things! How do you not know this!?")
             return
         return stmt
     def ifStatement(self):
-        self.consume("LEFT_PAREN", "Expect '(' after 'if'.")
+        self.consume("LEFT_PAREN", "I need a '(' after 'if'!")
         condition = self.expression()
-        self.consume("RIGHT_PAREN", "Expect ')' after if condition.")
+        self.consume("RIGHT_PAREN", "I need a '(' after an if condition!")
         thenBranch = self.statement()
         elseBranch = None
         if self.match("ELSE"):
             elseBranch = self.statement()
         return If(condition, thenBranch, elseBranch)
     def whileStatement(self):
-        self.consume("LEFT_PAREN", "Expect '(' after 'while'.")
+        self.consume("LEFT_PAREN", "I need a '(' after 'while'!")
         condition = self.expression()
-        self.consume("RIGHT_PAREN", "Expect ')' after while condition.")
+        self.consume("RIGHT_PAREN", "I need a '(' after a while condition!")
         body = self.statement()
         return While(condition, body)
     def forStatement(self):
-        self.consume("LEFT_PAREN", "Expect '(' after 'for'.")
+        self.consume("LEFT_PAREN", "I need a '(' after 'for'!")
         if self.match("SEMICOLON"):
             initialiser = None
         elif self.match("VAR"):
             initialiser = self.varDeclaration()
-            self.consume("SEMICOLON", "Expect ';' after initialiser")
+            self.consume("SEMICOLON", "I expect ';' after initialiser, you know!")
         else:
             initialiser = self.expressionStatement()
         if not self.check("SEMICOLON"):
             condition = self.expression()
         else:
             condition = None
-        self.consume("SEMICOLON", "Expect ';' after loop condition.")
+        self.consume("SEMICOLON", "I expect ';' after condition, you know!")
         if not self.check("RIGHT_PAREN"):
             increment = self.expression()
         else:
             increment = None
-        self.consume("RIGHT_PAREN", "Expect ')' after for clauses.")
+        self.consume("RIGHT_PAREN", "I need ')' after for clauses!")
         body = self.statement()
         if increment != None:
             body = Block([body, Expression(increment)])
@@ -124,6 +121,10 @@ class Parser:
         #    value = self.expression()
         #self.consume("SEMICOLON", "Expect ';' after return value.")
         return Return(keyword, value)
+    def raiseStatement(self):
+        keyword = self.previous()
+        value = self.expression()
+        return Raise(keyword, value)
     def expressionStatement(self):
         expr = self.expression()
         #print(type(expr))
@@ -135,17 +136,17 @@ class Parser:
         #self.consume("SEMICOLON", "Expect ';' after value.")
         return Expression(expr)
     def function(self, kind):
-        name = self.consume("IDENTIFIER", f"Expect {kind} name.")
-        self.consume("LEFT_PAREN", f"Expect '(' after {kind} name.")
+        name = self.consume("IDENTIFIER", f"You need to tell me the name of the {kind}!")
+        self.consume("LEFT_PAREN", f"You must always press '(' after {kind} name!")
         parameters = []
         if not self.check("RIGHT_PAREN"):
-            parameters.append(self.consume("IDENTIFIER", "Expect paramter name."))
+            parameters.append(self.consume("IDENTIFIER", "Why don't you want to tell me the parameter name!?"))
             while self.match("COMMA"):
                 if len(parameters) >= 255:
-                    self.error(self.peek(), "Can't have more than 255 paramaters.")
-                parameters.append(self.consume("IDENTIFIER", "Expect paramter name."))
-        self.consume("RIGHT_PAREN", "Expect ')' after parameters.")
-        self.consume("COLON", "Expect ':' before " + kind + " body.")
+                    self.error(self.peek(), "You can't have more than 255 paramaters! That's just greedy")
+                parameters.append(self.consume("IDENTIFIER", "Why don't you want to tell me the parameter name!?"))
+        self.consume("RIGHT_PAREN", "I need ')' after the paramter list!")
+        self.consume("COLON", f"I absolutely require ':' before {kind} body!")
         body = self.block()
         if name.lexeme == "main": self.mainFunction = True
         return Function(name, parameters, body)
@@ -155,7 +156,7 @@ class Parser:
         statements = []
         while (not self.check("SEMICOLON")) and (not self.isAtEnd()):
             statements.append(self.declaration())
-        self.consume("SEMICOLON", "Expect ';' after block.")
+        self.consume("SEMICOLON", "You need to have ';' after a block!")
         self.currentBlock = previousBlock
         return statements
     def assignment(self):
@@ -175,7 +176,7 @@ class Parser:
             elif type(expr) == Access:
                 #print(expr.accessee)
                 return ChAccess(expr.accessee, expr.index, value)
-            self.error(equals, "Invalid assignment target.")
+            self.error(equals, "That's an invalid assignment target!")
         elif self.match("PLUS_EQUAL"):
             equals = self.previous()
             value = self.assignment()
@@ -189,7 +190,7 @@ class Parser:
             elif type(expr) == Access:
                 #print(expr.accessee)
                 return ChAccess(expr.accessee, expr.index, value)
-            self.error(equals, "Invalid assignment target.")
+            self.error(equals, "That's an invalid assignment target!")
         elif self.match("MINUS_EQUAL"):
             equals = self.previous()
             value = self.assignment()
@@ -203,7 +204,7 @@ class Parser:
             elif type(expr) == Access:
                 #print(expr.accessee)
                 return ChAccess(expr.accessee, expr.index, value)
-            self.error(equals, "Invalid assignment target.")
+            self.error(equals, "That's an invalid assignment target!")
         elif self.match("STAR_EQUAL"):
             equals = self.previous()
             value = self.assignment()
@@ -217,7 +218,7 @@ class Parser:
             elif type(expr) == Access:
                 #print(expr.accessee)
                 return ChAccess(expr.accessee, expr.index, value)
-            self.error(equals, "Invalid assignment target.")
+            self.error(equals, "That's an invalid assignment target!")
         elif self.match("SLASH_EQUAL"):
             equals = self.previous()
             value = self.assignment()
@@ -231,7 +232,7 @@ class Parser:
             elif type(expr) == Access:
                 #print(expr.accessee)
                 return ChAccess(expr.accessee, expr.index, value)
-            self.error(equals, "Invalid assignment target.")
+            self.error(equals, "That's an invalid assignment target!")
         elif self.match("MODULO_EQUAL"):
             equals = self.previous()
             value = self.assignment()
@@ -245,7 +246,7 @@ class Parser:
             elif type(expr) == Access:
                 #print(expr.accessee)
                 return ChAccess(expr.accessee, expr.index, value)
-            self.error(equals, "Invalid assignment target.")
+            self.error(equals, "That's an invalid assignment target!")
         elif self.match("UP_ARROW_EQUAL"):
             equals = self.previous()
             value = self.assignment()
@@ -259,7 +260,7 @@ class Parser:
             elif type(expr) == Access:
                 #print(expr.accessee)
                 return ChAccess(expr.accessee, expr.index, value)
-            self.error(equals, "Invalid assignment target.")
+            self.error(equals, "That's an invalid assignment target!")
         elif self.match("PLUS_PLUS"):
             equals = self.previous()
             value = Literal(1.0)
@@ -273,7 +274,7 @@ class Parser:
             elif type(expr) == Access:
                 #print(expr.accessee)
                 return ChAccess(expr.accessee, expr.index, value)
-            self.error(equals, "Invalid assignment target.")
+            self.error(equals, "That's an invalid assignment target!")
         elif self.match("MINUS_MINUS"):
             equals = self.previous()
             value = Literal(1.0)
@@ -287,7 +288,7 @@ class Parser:
             elif type(expr) == Access:
                 #print(expr.accessee)
                 return ChAccess(expr.accessee, expr.index, value)
-            self.error(equals, "Invalid assignment target.")
+            self.error(equals, "That's an invalid assignment target!")
         return expr
     def type_cast(self):
         left = self.map()
@@ -303,7 +304,7 @@ class Parser:
             while not self.match("RIGHT_BRACE"):
                 item1 = self.list()
                 #print(item1)
-                self.consume("COLON", "Expect ':' between map items.")
+                self.consume("COLON", "I expect ':' between map items!")
                 item2 = self.list()
                 #print(item2)
                 keys.append(item1)
@@ -391,7 +392,7 @@ class Parser:
         while True:
             if self.match("LEFT_BRACKET"):
                 index = self.expression()
-                close = self.consume("RIGHT_BRACKET", "Expect ']' after list access.")
+                close = self.consume("RIGHT_BRACKET", "I expect ']' after list access.")
                 expr = Access(expr, close, index)
             else:
                 break
@@ -402,22 +403,22 @@ class Parser:
             if self.match("LEFT_PAREN"):
                 expr = self.finishCall(expr)
             elif self.match("DOT"):
-                name = self.consume("IDENTIFIER", "Expect property name after '.'.")
+                name = self.consume("IDENTIFIER", "You need to tell me the property name after '.'!")
                 expr = Get(expr, name)
             else:
                 break
         return expr
     def lam(self):
         if self.match("LM"):
-            self.consume("LEFT_PAREN", f"Expect '(' after 'lm'.")
+            self.consume("LEFT_PAREN", f"You need to start the paramater list with '('!")
             parameters = []
             if not self.check("RIGHT_PAREN"):
-                parameters.append(self.consume("IDENTIFIER", "Expect paramter name."))
+                parameters.append(self.consume("IDENTIFIER", "Tell us the parameter name!"))
                 while self.match("COMMA"):
                     if len(parameters) >= 255:
-                        self.error(self.peek(), "Can't have more than 255 paramaters.")
-                    parameters.append(self.consume("IDENTIFIER", "Expect paramter name."))
-            self.consume("RIGHT_PAREN", "Expect ')' after parameters.")
+                        self.error(self.peek(), "Having more than 255 parameters is just greedy!")
+                    parameters.append(self.consume("IDENTIFIER", "Tell us the parameter name!"))
+            self.consume("RIGHT_PAREN", "Close the parameter list with ')'!")
             self.consume("COLON", "Expect '{' before lambda body.")
             body = self.block()
             return Lambda(parameters, body)

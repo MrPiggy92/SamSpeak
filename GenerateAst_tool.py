@@ -36,6 +36,7 @@ class GenerateAst:
         "Function   : name, params, body",
         "If         : condition, thenBranch, elseBranch",
         "Return     : keyword, value",
+        "Raise      : keyword, value",
         "Var        : name, initialiser",
         "While      : condition, body",
         "Try        : contents, catch"

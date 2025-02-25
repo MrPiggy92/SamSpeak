@@ -33,11 +33,12 @@ class Resolver:
     def visitReturnStmt(self, stmt):
         if self.currentFunction == "NONE":
             self.SamSpeak.parseError(stmt.keyword, "Can't return from top-level code.")
-        if stmt.value != None:
-            if self.currentFunction == "INITIALISER":
-                self.SamSpeak.parseError(stmt.keyword, "Can't return a value from an initialiser.")
-            self.resolve(stmt.value)
+        if self.currentFunction == "INITIALISER":
+            self.SamSpeak.parseError(stmt.keyword, "Can't return a value from an initialiser.")
+        self.resolve(stmt.value)
         return None
+    def visitRaiseStmt(self, stmt):
+        self.resolve(stmt.value)
     def visitWhileStmt(self, stmt):
         self.resolve(stmt.condition)
         self.resolve(stmt.body)

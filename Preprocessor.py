@@ -10,7 +10,7 @@ class Preprocessor:
             if line.startswith('#'):
                 self.code.pop(num)
                 if not os.path.exists(f"{line[1:]}.ss"):
-                    self.SamSpeak.error(num+1, "File does not exist")
+                    self.SamSpeak.scanError(num+1, "This file doesn't exist!")
                     continue
                 if f"{line[1:]}.ss" in self.filesRead:
                     continue

@@ -282,10 +282,12 @@ class Interpreter:
         self.environment.define(stmt.name.lexeme, function)
         return function
     def visitReturnStmt(self, stmt):
-        value = None
-        if stmt.value != None:
-            value = self.evaluate(stmt.value)
+        value = self.evaluate(stmt.value)
         raise Return(value)
+    def visitRaiseStmt(self, stmt):
+        value = self.evaluate(stmt.value)
+        value = self.stringify(value)
+        raise SamSpeakRuntimeError(stmt.keyword, value)
     def visitVarStmt(self, stmt):
         value = None
         if stmt.initialiser != None:
