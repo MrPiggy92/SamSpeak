@@ -1,0 +1,203 @@
+questions:
+- Q: Do you want a creamy dessert?
+  A:
+  - 'Yes'
+  - 'No'
+- Q: Do you want a hot or cold dessert?
+  A:
+  - Hot
+  - Cold
+- Q: Do you prefer chocolate-based desserts?
+  A:
+  - 'Yes'
+  - 'No'
+- Q: Do you like fruit in your dessert?
+  A:
+  - 'Yes'
+  - 'No'
+- Q: Do you want a baked dessert?
+  A:
+  - 'Yes'
+  - 'No'
+
+results:
+- name: Molten Chocolate Lava Cake
+  Q1: 'Yes'
+  Q2: Hot
+  Q3: 'Yes'
+  Q4: 'No'
+  Q5: 'Yes'
+- name: Warm Fudge Brownie
+  Q1: 'Yes'
+  Q2: Hot
+  Q3: 'Yes'
+  Q4: 'No'
+  Q5: 'No'
+- name: Hot Chocolate Soufflé
+  Q1: 'Yes'
+  Q2: Hot
+  Q3: 'Yes'
+  Q4: 'Yes'
+  Q5: 'Yes'
+- name: Chocolate Fondue with Fruit
+  Q1: 'Yes'
+  Q2: Hot
+  Q3: 'Yes'
+  Q4: 'Yes'
+  Q5: 'No'
+- name: Creme Brulee
+  Q1: 'Yes'
+  Q2: Hot
+  Q3: 'No'
+  Q4: 'No'
+  Q5: 'Yes'
+- name: Warm Rice Pudding
+  Q1: 'Yes'
+  Q2: Hot
+  Q3: 'No'
+  Q4: 'No'
+  Q5: 'No'
+- name: Baked Alaska
+  Q1: 'Yes'
+  Q2: Cold
+  Q3: 'Yes'
+  Q4: 'No'
+  Q5: 'Yes'
+- name: Chocolate Ice Cream Sundae
+  Q1: 'Yes'
+  Q2: Cold
+  Q3: 'Yes'
+  Q4: 'No'
+  Q5: 'No'
+- name: Chocolate-Covered Strawberries
+  Q1: 'Yes'
+  Q2: Cold
+  Q3: 'Yes'
+  Q4: 'Yes'
+  Q5: 'Yes'
+- name: Chocolate Mousse
+  Q1: 'Yes'
+  Q2: Cold
+  Q3: 'Yes'
+  Q4: 'Yes'
+  Q5: 'No'
+- name: Classic Cheesecake
+  Q1: 'Yes'
+  Q2: Cold
+  Q3: 'No'
+  Q4: 'No'
+  Q5: 'Yes'
+- name: Panna Cotta
+  Q1: 'Yes'
+  Q2: Cold
+  Q3: 'No'
+  Q4: 'No'
+  Q5: 'No'
+- name: Strawberry Shortcake
+  Q1: 'Yes'
+  Q2: Cold
+  Q3: 'No'
+  Q4: 'Yes'
+  Q5: 'Yes'
+- name: Fruit Parfait
+  Q1: 'Yes'
+  Q2: Cold
+  Q3: 'No'
+  Q4: 'Yes'
+  Q5: 'No'
+- name: Sticky Toffee Pudding
+  Q1: 'No'
+  Q2: Hot
+  Q3: 'No'
+  Q4: 'No'
+  Q5: 'Yes'
+- name: Bread Pudding
+  Q1: 'No'
+  Q2: Hot
+  Q3: 'No'
+  Q4: 'No'
+  Q5: 'No'
+- name: Apple Crumble
+  Q1: 'No'
+  Q2: Hot
+  Q3: 'No'
+  Q4: 'Yes'
+  Q5: 'Yes'
+- name: Baked Pear with Honey
+  Q1: 'No'
+  Q2: Hot
+  Q3: 'No'
+  Q4: 'Yes'
+  Q5: 'No'
+- name: Chocolate Chip Cookies
+  Q1: 'No'
+  Q2: Hot
+  Q3: 'Yes'
+  Q4: 'No'
+  Q5: 'Yes'
+- name: Hot Chocolate Drink
+  Q1: 'No'
+  Q2: Hot
+  Q3: 'Yes'
+  Q4: 'No'
+  Q5: 'No'
+- name: Chocolate Bread Pudding
+  Q1: 'No'
+  Q2: Hot
+  Q3: 'Yes'
+  Q4: 'Yes'
+  Q5: 'Yes'
+- name: Chocolate-Covered Banana
+  Q1: 'No'
+  Q2: Hot
+  Q3: 'Yes'
+  Q4: 'Yes'
+  Q5: 'No'
+- name: Fruit Sorbet
+  Q1: 'No'
+  Q2: Cold
+  Q3: 'No'
+  Q4: 'Yes'
+  Q5: 'No'
+- name: Fresh Fruit Salad
+  Q1: 'No'
+  Q2: Cold
+  Q3: 'No'
+  Q4: 'Yes'
+  Q5: 'Yes'
+- name: Lemon Tart
+  Q1: 'No'
+  Q2: Cold
+  Q3: 'No'
+  Q4: 'No'
+  Q5: 'Yes'
+- name: Gelato
+  Q1: 'No'
+  Q2: Cold
+  Q3: 'No'
+  Q4: 'No'
+  Q5: 'No'
+- name: Chocolate Ice Cream
+  Q1: 'No'
+  Q2: Cold
+  Q3: 'Yes'
+  Q4: 'No'
+  Q5: 'Yes'
+- name: Chocolate Milkshake
+  Q1: 'No'
+  Q2: Cold
+  Q3: 'Yes'
+  Q4: 'No'
+  Q5: 'No'
+- name: Chocolate Dipped Orange Slices
+  Q1: 'No'
+  Q2: Cold
+  Q3: 'Yes'
+  Q4: 'Yes'
+  Q5: 'Yes'
+- name: Frozen Chocolate Banana
+  Q1: 'No'
+  Q2: Cold
+  Q3: 'Yes'
+  Q4: 'Yes'
+  Q5: 'No'

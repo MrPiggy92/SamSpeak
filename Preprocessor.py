@@ -8,7 +8,7 @@ class Preprocessor:
     def preprocess(self):
         for num, line in enumerate(self.code):
             if line.startswith('#'):
-                self.code.pop(num)
+                self.code[num] = ""
                 if not os.path.exists(f"{line[1:]}.ss"):
                     self.SamSpeak.scanError(num+1, "This file doesn't exist!")
                     continue
@@ -24,7 +24,7 @@ class Preprocessor:
                 self.code = self.preprocess()
             elif line.startswith('!'):
                 #print(line[1:])
-                self.code.pop(num)
+                self.code[num] = ""
                 self.SamSpeak.interpreter.addModule(line[1:])
                 self.code = self.preprocess()
         return self.code

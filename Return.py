@@ -1,4 +1,4 @@
 from SamSpeakRuntimeError import *
-class Return(SamSpeakRuntimeError):
+class SSReturn(SamSpeakRuntimeError):
     def __init__(self, value):
         self.value = value

@@ -77,7 +77,8 @@ class Parser:
     def whileStatement(self):
         self.consume("LEFT_PAREN", "I need a '(' after 'while'!")
         condition = self.expression()
-        self.consume("RIGHT_PAREN", "I need a '(' after a while condition!")
+        #print(condition)
+        self.consume("RIGHT_PAREN", "I need a ')' after a while condition!")
         body = self.statement()
         return While(condition, body)
     def forStatement(self):
@@ -141,7 +142,7 @@ class Parser:
         parameters = []
         if not self.check("RIGHT_PAREN"):
             parameters.append(self.consume("IDENTIFIER", "Why don't you want to tell me the parameter name!?"))
-            while self.match("COMMA"):
+            while not self.check("RIGHT_PAREN") and not self.isAtEnd():
                 if len(parameters) >= 255:
                     self.error(self.peek(), "You can't have more than 255 paramaters! That's just greedy")
                 parameters.append(self.consume("IDENTIFIER", "Why don't you want to tell me the parameter name!?"))
@@ -299,17 +300,24 @@ class Parser:
         return left
     def map(self):
         if self.match("LEFT_BRACE"):
+            #print("\n")
+            #print(self.previous().line)
             keys = []
             values = []
             while not self.match("RIGHT_BRACE"):
                 item1 = self.list()
-                #print(item1)
+                #print(f"Item 1: {item1}")
                 self.consume("COLON", "I expect ':' between map items!")
-                item2 = self.list()
-                #print(item2)
+                item2 = self.map()
+                #print(f"Item 2: {item2}")
                 keys.append(item1)
                 values.append(item2)
+                #print(keys)
+                #print(values)
+                #print('\n')
                 #print()
+            #print(keys)
+            #print(values)
             return Map(keys, values)
         else:
             return self.list()
@@ -317,7 +325,8 @@ class Parser:
         if self.match("LEFT_BRACKET"):
             contents = []
             while not self.match("RIGHT_BRACKET"):
-                item = self.logicalOr()
+                item = self.map()
+                #print(f"\n{item}\n")
                 contents.append(item)
             return List(contents)
         else:
@@ -414,7 +423,7 @@ class Parser:
             parameters = []
             if not self.check("RIGHT_PAREN"):
                 parameters.append(self.consume("IDENTIFIER", "Tell us the parameter name!"))
-                while self.match("COMMA"):
+                while not self.check("RIGHT_PAREN") and not self.isAtEnd():
                     if len(parameters) >= 255:
                         self.error(self.peek(), "Having more than 255 parameters is just greedy!")
                     parameters.append(self.consume("IDENTIFIER", "Tell us the parameter name!"))
@@ -453,7 +462,7 @@ class Parser:
         arguments = []
         if not self.check("RIGHT_PAREN"):
             arguments.append(self.expression())
-            while self.match("COMMA"):
+            while not self.check("RIGHT_PAREN") and not self.isAtEnd():
                 if len(arguments) >= 255:
                     self.error(self.peek(), "Having more than 255 arguments is greedy!")
                 arguments.append(self.expression())

@@ -60,7 +60,7 @@ class Resolver:
             self.beginScope()
             self.scopes[-1]["super"] = True
         self.beginScope()
-        self.scopes[-1]["this"] = True
+        self.scopes[-1]["me"] = True
         for method in stmt.methods:
             declaration = "METHOD"
             if method.name.lexeme == "new":

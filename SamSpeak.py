@@ -6,21 +6,25 @@ if __name__ == "__main__":
     from Resolver import *
     from Preprocessor import *
     from insults import *
+    from Compiler import *
+    from Transpiler import *
 
 class SamSpeak:
     def __init__(self):
         self.hadError = False
         self.hadRuntimeError = False
-        self.interpreter = Interpreter(self)
+        #self.interpreter = Interpreter(self)
+        #self.interpreter = Compiler(self)
+        self.interpreter = Transpiler(self)
     def main(self):
-        self.runFile("test.ss")
-        #if len(sys.argv) > 2:
-        #    print("Usage: python3 SamSpeak.py [script]")
-        #    exit(64)
-        #if len(sys.argv) >= 2:
-        #    self.runFile(sys.argv[1])
-        #else:
-        #    self.runPrompt()
+        #self.runFile("quiz.ss")
+        if len(sys.argv) > 2:
+            print("Usage: python3 SamSpeak.py [script]")
+            exit(64)
+        if len(sys.argv) >= 2:
+            self.runFile(sys.argv[1])
+        else:
+            self.runPrompt()
     def runFile(self, path):
         with open(path) as file:
             code = file.read()
@@ -38,14 +42,16 @@ class SamSpeak:
             preprocessor = Preprocessor(fileName, self, source)
             source = '\n'.join(preprocessor.preprocess())
             #print(source)
+            #print(source)
             scanner = Scanner(source, self)
             tokens = scanner.scanTokens()
             parser = Parser(tokens, self, fileName)
+            #filename = False
             if fileName:
-                #args = list(sys.argv)
-                #args.pop(0)
-                #args.pop(0)
-                args = []
+                args = list(sys.argv)
+                args.pop(0)
+                args.pop(0)
+                #args = []
                 statements = parser.parse(args)
             else:
                 statements = parser.parse()
@@ -55,7 +61,7 @@ class SamSpeak:
             resolver = Resolver(self.interpreter, self)
             resolver.resolve(statements)
             if self.hadError: return
-            self.interpreter.interpret(statements)
+            self.interpreter.generate(statements)
         except KeyboardInterrupt:
             print("Cancel")
             self.hadError = True

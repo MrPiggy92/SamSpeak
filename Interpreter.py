@@ -15,7 +15,7 @@ class Interpreter:
         self.SamSpeak_class = SamSpeak
         self.globals = Environment()
         self.environment = self.globals
-        self.modules = {"time": "SSTime", "io": "SSIo", "random": "SSRandom", "data": "SSLists", "math": "SSMath"}
+        self.modules = {"time": "SSTime", "io": "SSIo", "random": "SSRandom", "data": "SSLists", "math": "SSMath", "persist": "SSPersist"}
         self.locals = {}
         self.currentBlock = "NONE"
     def addModule(self, module):
@@ -23,7 +23,7 @@ class Interpreter:
             module = importlib.import_module(self.modules[module])
             for func in module.builtins.keys():
                 self.globals.define(func, module.builtins[func])
-    def interpret(self, statements):
+    def generate(self, statements):
         try:
             for statement in statements:
                 self.execute(statement)
@@ -39,7 +39,7 @@ class Interpreter:
             self.checkNumberOperand(expr.operator, right)
             return -float(right)
         elif expr.operator.type == "BANG":
-            return not self.isTruthy(right.value)
+            return not self.isTruthy(right)
     def visitGetExpr(self, expr):
         object = self.evaluate(expr.object)
         if type(object) == SamSpeakInstance:
@@ -79,7 +79,7 @@ class Interpreter:
             self.checkNumberOperands(expr.operator, left, right)
             return self.isEqual(left, right)
         elif expr.operator.type == "BANG_EQUAL":
-            self.checkNumberOperands(expr.operator, left, right)
+            #self.checkNumberOperands(expr.operator, left, right)
             return not self.isEqual(left, right)
         elif expr.operator.type == "MINUS":
             self.checkNumberOperands(expr.operator, left, right)
@@ -296,7 +296,7 @@ class Interpreter:
         return function
     def visitReturnStmt(self, stmt):
         value = self.evaluate(stmt.value)
-        raise Return(value)
+        raise SSReturn(value)
     def visitRaiseStmt(self, stmt):
         value = self.evaluate(stmt.value)
         value = self.stringify(value)
@@ -376,7 +376,8 @@ class Interpreter:
         raise SamSpeakRuntimeError(operator, "The operand must be a number!")
     def checkNumberOperands(self, operator, left, right):
         if type(left) == type(right) == float: return
-        raise SamSpeakRuntimeError(operator, "The operand must be a number!")
+        print(operator.line)
+        raise SamSpeakRuntimeError(operator, "The operands must be a number!")
     def stringify(self, value):
         if value == None: return "nil"
         if type(value) == float:

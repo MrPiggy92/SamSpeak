@@ -20,7 +20,7 @@ class SamSpeakFunction(SamSpeakCallable):
         try:
             interpreter.executeBlock(self.declaration.body, environment)
             #interpreter.currentBlock = "NONE"
-        except Return as e:
+        except SSReturn as e:
             if self.isInitialiser: return self.closure.getAt(0, "me")
             return e.value
         if self.isInitialiser: return self.closure.getAt(0, "me")
