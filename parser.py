@@ -449,7 +449,7 @@ class Parser:
         elif self.match("IDENTIFIER"):
             #print(self.previous())
             return Variable(self.previous())
-        elif self.match("NUM", "STR", "NIL", "BOOL", "LIST"):
+        elif self.match("NUM", "STR", "NIL", "BOOL", "LIST", "MAP"):
             return Type(self.previous())
         elif self.match("LEFT_PAREN"):
             expr = self.expression()

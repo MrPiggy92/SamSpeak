@@ -19,7 +19,7 @@ TokenType = [
     "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE", "LM",
     
     # Types
-    "NUM", "STR", "BOOL", "NIL", "LIST",
+    "NUM", "STR", "BOOL", "NIL", "LIST", "MAP"
     
     # EOF
     "EOF"

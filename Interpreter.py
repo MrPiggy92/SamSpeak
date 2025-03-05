@@ -272,6 +272,11 @@ class Interpreter:
                 return list(left)
             except:
                 raise SamSpeakRuntimeError(expr.colon, f"Please tell me how to convert {left} to {expr.new_type.name.lexeme}!")
+        elif expr.new_type.name.type == "MAP":
+            try:
+                return dict(left)
+            except:
+                raise SamSpeakRuntimeError(expr.colon, f"Please tell me how to convert {left} to {expr.new_type.name.lexeme}!")
         elif expr.new_type.name.type == "BOOL":
             return self.isTruthy(left)
     def visitMeExpr(self, expr):

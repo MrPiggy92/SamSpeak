@@ -58,9 +58,9 @@ class SamSpeak:
             #print('\n\n'.join([str(statement) for statement in statements]))
             #print('\n\n'.join([str(statement) for statement in statements[0].body]))
             if self.hadError: return
-            resolver = Resolver(self.interpreter, self)
-            resolver.resolve(statements)
-            if self.hadError: return
+            #resolver = Resolver(self.interpreter, self)
+            #resolver.resolve(statements)
+            #if self.hadError: return
             self.interpreter.generate(statements)
         except KeyboardInterrupt:
             print("Cancel")
